@@ -1,97 +1,154 @@
 # Spotify to Deezer Converter
 
-A React + Vite application that converts Spotify track links to equivalent Deezer track links.
+Convert Spotify track links to equivalent Deezer links, or YouTube Music links effortlessly. Built with React, Vite, and Tailwind CSS.
 
 ## Features
 
-- ✅ Parse various Spotify URL formats
-- ✅ Fetch track metadata from Spotify API  
-- ✅ Search for matching tracks on Deezer
-- ✅ Smart matching algorithm using artist, title, and album info
-- ✅ Clean, responsive UI
-- ✅ Copy Deezer links to clipboard
+- 🎵 Convert Spotify track URLs to Deezer links
+- 🔍 Find up to 5 closest matches on Deezer
+- 🌐 Web-based application
+- 🎨 Modern UI with responsive design
+- ⚡ Fast and accurate matching using Levenshtein distance
+- 📋 Copy links to clipboard
+- 🔗 Open tracks directly in Deezer
 
-## Setup
+## Tech Stack
 
-### 1. Install Dependencies
+- **React** - Modern web framework for building user interfaces
+- **Vite** - Fast build tool and development server
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **Biome** - Fast linter and formatter
 
-```bash
-npm install
-```
+## Getting Started
 
-### 2. Configure Spotify API
+### Prerequisites
 
-1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-2. Create a new app
-3. Copy your Client ID and Client Secret
-4. Create a `.env` file based on `.env.example`:
+- Node.js 18+
+- pnpm (or npm/yarn)
 
-```bash
-cp .env.example .env
-```
-
-5. Fill in your Spotify credentials:
-
-```env
-VITE_SPOTIFY_CLIENT_ID=your_spotify_client_id_here
-VITE_SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
-```
-
-### 3. Run the Application
+### Installation
 
 ```bash
-npm run dev
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Preview production build
+pnpm preview
 ```
 
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
+### Available Scripts
 
-## Usage
+- `pnpm dev` - Start Vite development server
+- `pnpm build` - Build for production
+- `pnpm preview` - Preview production build
+- `pnpm lint` - Run Biome linter
+- `pnpm lint:fix` - Auto-fix linting issues
+- `pnpm format` - Format code with Biome
 
-1. Copy a Spotify track URL (e.g., from the Spotify app or web player)
-2. Paste it into the input field
-3. Click "Convert" 
-4. Get the equivalent Deezer link!
+## Supported URL Formats
 
-### Supported URL Formats
-
-- `https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh`
-- `https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh?si=...`
-- `spotify:track:4iV5W9uYEdYUVa79Axb7Rh`
+- `https://open.spotify.com/track/{track-id}`
+- `spotify:track:{track-id}`
 
 ## How It Works
 
-1. **URL Parsing**: Extracts the Spotify track ID from various URL formats
-2. **Spotify API**: Fetches detailed track metadata (artist, title, album, etc.)
-3. **Deezer Search**: Searches Deezer's API using multiple query strategies
-4. **Smart Matching**: Uses a scoring algorithm to find the best match based on:
-   - Artist name similarity
-   - Track title similarity  
-   - Album name (when available)
-   - Duration matching (when available)
+1. Paste a Spotify track URL
+2. The app fetches track information from Spotify's oEmbed API
+3. It searches Deezer's API for matching tracks
+4. Uses string similarity algorithms to find the best matches
+5. Displays results with album art and track details
 
-## Technologies Used
+## Project Structure
 
-- React 18
-- Vite
-- Axios (for API calls)
-- Spotify Web API
-- Deezer API
+```
+spoty2deezer/
+├── src/
+│   ├── components/
+│   │   ├── common/               # Reusable UI components
+│   │   ├── link-converter/       # Main converter functionality
+│   │   └── ...
+│   ├── hooks/                    # Custom React hooks
+│   ├── services/                 # API services
+│   │   ├── spotifyService.ts     # Spotify API integration
+│   │   ├── deezerService.ts      # Deezer API integration
+│   │   └── youtubeMusicService.ts # YouTube Music API integration
+│   ├── types/                    # TypeScript type definitions
+│   ├── utils/                    # Utility functions
+│   └── ...
+├── index.html                    # HTML entry point
+├── vite.config.ts               # Vite configuration
+├── tailwind.config.js           # Tailwind CSS configuration
+├── tsconfig.json                # TypeScript configuration
+└── package.json                 # Project dependencies
+```
 
-## API Information
+## API Usage
 
-- **Spotify API**: Uses Client Credentials flow for authentication
-- **Deezer API**: No authentication required for search operations
+### Spotify
+- Uses Spotify's oEmbed API (no authentication required)
+- Fetches basic track information
 
-## Build
+### Deezer
+- Uses Deezer's public search API via JSONP
+- No authentication required
 
-```bash
-npm run build
+### YouTube Music
+- Integrates with YouTube Music for additional matching options
+
+## Development
+
+### Adding New Features
+
+The codebase uses standard React patterns:
+
+```tsx
+import React, { useState } from 'react';
+
+function ExampleComponent() {
+  const [state, setState] = useState('');
+
+  return (
+    <div className="p-4 bg-white rounded-lg shadow-lg">
+      <h1 className="text-xl font-bold text-gray-900">
+        Hello World
+      </h1>
+    </div>
+  );
+}
+```
+
+### Styling
+
+Uses Tailwind CSS for styling:
+
+```tsx
+<div className="flex-1 bg-white p-4 rounded-lg shadow-lg">
+  <h1 className="text-xl font-bold text-gray-900">
+    Hello World
+  </h1>
+</div>
 ```
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Run `pnpm lint:fix` and `pnpm format`
+5. Submit a pull request
+
+## License
+
+MIT
+
+## Acknowledgments
+
+- Made with ❤️ for music lovers
+- Inspired by the need to convert playlists between streaming services
