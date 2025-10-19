@@ -9,7 +9,7 @@ services:
     pnpm install --prod --frozen-lockfile
   startCommand: pnpm start
   plan: free
-  healthCheckPath: /
+  healthCheckPath: /health
   envVars:
   - key: NODE_VERSION
     value: 20
