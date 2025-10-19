@@ -9,7 +9,9 @@ const PORT = process.env.PORT || 3001;
 
 // Allowed domains for security validation (configurable via ALLOWED_DOMAINS env var)
 const allowedDomains = process.env.ALLOWED_DOMAINS
-	? process.env.ALLOWED_DOMAINS.split(',').map((domain) => domain.trim())
+	? process.env.ALLOWED_DOMAINS.split(',').map((domain) =>
+			domain.trim().toLowerCase(),
+		)
 	: [
 			'open.spotify.com',
 			'api.spotify.com',
@@ -29,7 +31,7 @@ app.use(
 app.use(express.json());
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
 	res.json({
 		status: 'OK',
 		timestamp: new Date().toISOString(),
@@ -54,7 +56,9 @@ app.get('/proxy', async (req, res) => {
 		try {
 			const urlObj = new URL(url);
 			const isAllowed = allowedDomains.some(
-				(domain) => urlObj.hostname === domain || urlObj.hostname.endsWith(`.${domain}`),
+				(domain) =>
+					urlObj.hostname.toLowerCase() === domain ||
+					urlObj.hostname.toLowerCase().endsWith(`.${domain}`),
 			);
 
 			if (!isAllowed) {
@@ -63,7 +67,7 @@ app.get('/proxy', async (req, res) => {
 					message: 'Only music service domains are permitted',
 				});
 			}
-		} catch (urlError) {
+		} catch (_error) {
 			return res.status(400).json({
 				error: 'Invalid URL format',
 				message: 'Please provide a valid URL',
@@ -74,8 +78,8 @@ app.get('/proxy', async (req, res) => {
 
 		// Make the request to the target URL
 		const response = await axios.get(url, {
-			timeout: parseInt(process.env.REQUEST_TIMEOUT) || 15000, // Configurable timeout (default 15 seconds)
-			maxRedirects: parseInt(process.env.MAX_REDIRECTS) || 5,
+			timeout: parseInt(process.env.REQUEST_TIMEOUT, 10) || 15000, // Configurable timeout (default 15 seconds)
+			maxRedirects: parseInt(process.env.MAX_REDIRECTS, 10) || 5,
 			headers: {
 				'User-Agent': process.env.USER_AGENT || 'MusicConverter-Backend/1.0',
 				Accept: 'application/json, text/html, */*',
@@ -130,7 +134,7 @@ app.get('/proxy', async (req, res) => {
 });
 
 // Catch-all handler for undefined routes
-app.use('*', (req, res) => {
+app.use('*', (_req, res) => {
 	res.status(404).json({
 		error: 'Endpoint not found',
 		message: 'Use /proxy?url=<encoded-url> for API requests',
@@ -140,9 +144,13 @@ app.use('*', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-	console.log(`🚀 Music Converter Backend Proxy Server running on port ${PORT}`);
+	console.log(
+		`🚀 Music Converter Backend Proxy Server running on port ${PORT}`,
+	);
 	console.log(`📡 Health check: http://localhost:${PORT}/health`);
-	console.log(`🔗 Proxy endpoint: http://localhost:${PORT}/proxy?url=<encoded-url>`);
+	console.log(
+		`🔗 Proxy endpoint: http://localhost:${PORT}/proxy?url=<encoded-url>`,
+	);
 	console.log(`🛡️ Allowed domains: ${allowedDomains.join(', ')}`);
 });
 

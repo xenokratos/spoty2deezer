@@ -95,9 +95,18 @@ Create a `.env` file in the `/front` directory:
 VITE_DEV_PORT=5173
 
 # Backend Proxy Configuration
-VITE_PROXY_TARGET=http://localhost:3001
+VITE_PROXY_TARGET=https://spoty2deezer.onrender.com
 
 # Application Configuration
+VITE_BASE_PATH=/spoty2deezer/
+```
+
+For local development, create a `.env.local` file to override with localhost URLs:
+
+```bash
+# Local Development Environment Variables
+VITE_DEV_PORT=5173
+VITE_PROXY_TARGET=http://localhost:3001
 VITE_BASE_PATH=/spoty2deezer/
 ```
 

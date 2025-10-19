@@ -16,12 +16,13 @@ export async function fetchWithProxy<T = any>(
 ): Promise<T> {
 	const { timeout = 15000, maxRetries = 2, retryDelay = 1000 } = options;
 
-	// Use your own backend proxy instead of third-party services
 	const backendProxyUrl = createProxyUrl(targetUrl);
 
 	for (let attempt = 0; attempt <= maxRetries; attempt++) {
 		try {
-			console.log(`Trying backend proxy for ${targetUrl} (attempt ${attempt + 1})`);
+			console.log(
+				`Trying backend proxy for ${targetUrl} (attempt ${attempt + 1})`,
+			);
 
 			const response = await axios.get(backendProxyUrl, {
 				timeout,
@@ -62,9 +63,15 @@ export function unwrapProxyResponse<T>(response: AxiosResponse): T {
 
 	const wrappedResponse = typeof data === 'string' ? JSON.parse(data) : data;
 
-	if (wrappedResponse && typeof wrappedResponse === 'object' && 'contents' in wrappedResponse) {
+	if (
+		wrappedResponse &&
+		typeof wrappedResponse === 'object' &&
+		'contents' in wrappedResponse
+	) {
 		const contents = wrappedResponse.contents;
-		return (typeof contents === 'string' ? JSON.parse(contents) : contents) as T;
+		return (
+			typeof contents === 'string' ? JSON.parse(contents) : contents
+		) as T;
 	}
 
 	// Fallback: return as-is if no wrapping detected
@@ -81,9 +88,7 @@ export function createProxyUrl(url: string): string {
 		return `/proxy?url=${encodeURIComponent(url)}`;
 	}
 
-	// In production, use your own backend proxy server
-	// ⚠️ Replace this URL with your deployed backend proxy URL
-	const backendProxyUrl = 'https://your-backend-proxy.herokuapp.com';
+	const backendProxyUrl = process.env.VITE_PROXY_TARGET;
 
 	return `${backendProxyUrl}/proxy?url=${encodeURIComponent(url)}`;
 }
