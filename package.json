@@ -1,0 +1,31 @@
+{
+  "name": "music-converter-fullstack",
+  "version": "1.0.0",
+  "description": "Full-stack music converter with frontend and backend proxy",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:front\" \"npm run dev:back\"",
+    "dev:front": "cd front && npm run dev",
+    "dev:back": "cd back && npm start",
+    "build": "cd front && npm run build",
+    "install:all": "npm install && cd front && npm install && cd ../back && npm install",
+    "clean": "rm -rf node_modules front/node_modules back/node_modules front/dist",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "@biomejs/biome": "^2.2.6"
+  },
+  "keywords": [
+    "music",
+    "converter",
+    "spotify",
+    "deezer",
+    "proxy",
+    "cors"
+  ],
+  "author": "Music Converter Team",
+  "license": "MIT",
+  "packageManager": "pnpm@8.15.9+sha512.499434c9d8fdd1a2794ebf4552b3b25c0a633abcee5bb15e7b5de90f32f47b513aca98cd5cfd001c31f0db454bc3804edccd578501e4ca293a6816166bbd9f81"
+}

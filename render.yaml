@@ -1,0 +1,17 @@
+services:
+- type: web
+  name: spoty2deezer
+  env: node
+  rootDir: back
+  buildCommand: |
+    corepack enable
+    corepack install
+    pnpm install --prod --frozen-lockfile
+  startCommand: pnpm start
+  plan: free
+  healthCheckPath: /
+  envVars:
+  - key: NODE_VERSION
+    value: 20
+  - key: ALLOWLIST
+    value: link.deezer.com,www.deezer.com,api.deezer.com,open.spotify.com,spotify.link
