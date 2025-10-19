@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useDeezerToYouTubeMusic } from '../../hooks/useDeezerToYouTubeMusic';
 import { useSpotifyToDeezer } from '../../hooks/useSpotifyToDeezer';
 import { useSpotifyToYouTubeMusic } from '../../hooks/useSpotifyToYouTubeMusic';
-import type { DeezerTrack } from '../../types/deezer.types';
-import type { SpotifyTrack } from '../../types/spotify.types';
+import type { DeezerAlbum, DeezerTrack } from '../../types/deezer.types';
+import type { SpotifyAlbum, SpotifyTrack } from '../../types/spotify.types';
 import type { YouTubeMusicTrack } from '../../types/youtubeMusic.types';
 import { detectPlatform } from '../../utils/urlParser';
 import { ConversionForm } from '../common/ConversionForm';
@@ -14,9 +14,11 @@ import { SupportedFormats } from '../common/SupportedFormats';
 import { ConversionResults } from './ConversionResults';
 
 interface ConversionState {
-	sourceTrack: SpotifyTrack | DeezerTrack;
+	sourceTrack?: SpotifyTrack | DeezerTrack;
+	sourceAlbum?: SpotifyAlbum | DeezerAlbum;
 	sourcePlatform: 'spotify' | 'deezer';
 	deezerMatches: DeezerTrack[];
+	deezerAlbumMatches?: DeezerAlbum[];
 	youtubeMatches: YouTubeMusicTrack[];
 }
 
@@ -59,22 +61,20 @@ export const LinkConverter = () => {
 	};
 
 	const handleSpotifyConversion = (url: string): void => {
-		Promise.all([
-			convertSpotifyToDeezer(url),
-			convertSpotifyToYouTubeMusic(url),
-		])
+		Promise.all([convertSpotifyToDeezer(url), convertSpotifyToYouTubeMusic(url)])
 			.then(([deezerResult, youtubeResult]) => {
 				setResult({
 					sourceTrack: deezerResult.spotifyTrack,
+					sourceAlbum: deezerResult.spotifyAlbum,
 					sourcePlatform: 'spotify',
 					deezerMatches: deezerResult.deezerMatches,
+					deezerAlbumMatches: deezerResult.deezerAlbumMatches,
 					youtubeMatches: youtubeResult.youtubeMatches,
 				});
 				setLoading(false);
 			})
 			.catch((err) => {
-				const errorMessage =
-					err instanceof Error ? err.message : 'error.unknown';
+				const errorMessage = err instanceof Error ? err.message : 'error.unknown';
 				setError(errorMessage);
 				setLoading(false);
 			});
@@ -92,8 +92,7 @@ export const LinkConverter = () => {
 				setLoading(false);
 			})
 			.catch((err) => {
-				const errorMessage =
-					err instanceof Error ? err.message : 'error.unknown';
+				const errorMessage = err instanceof Error ? err.message : 'error.unknown';
 				setError(errorMessage);
 				setLoading(false);
 			});
@@ -139,8 +138,10 @@ export const LinkConverter = () => {
 					{result && !loading && (
 						<ConversionResults
 							sourceTrack={result.sourceTrack}
+							sourceAlbum={result.sourceAlbum}
 							sourcePlatform={result.sourcePlatform}
 							deezerMatches={result.deezerMatches}
+							deezerAlbumMatches={result.deezerAlbumMatches}
 							youtubeMatches={result.youtubeMatches}
 							onClear={handleClear}
 							onOpenURL={handleOpenURL}

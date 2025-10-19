@@ -22,6 +22,17 @@ export interface SpotifyTrack {
 	images: SpotifyImage[];
 }
 
+export interface SpotifyAlbum {
+	id: string;
+	name: string;
+	artists: string[];
+	tracks?: SpotifyTrack[];
+	release_date?: string;
+	total_tracks?: number;
+	external_urls: SpotifyExternalUrls;
+	images: SpotifyImage[];
+}
+
 export interface SpotifyOEmbedResponse {
 	title?: string;
 	thumbnail_url?: string;

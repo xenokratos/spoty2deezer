@@ -38,6 +38,38 @@ export function parseSpotifyUrl(url: string | null | undefined): string | null {
 }
 
 /**
+ * Extracts the album ID from a Spotify URL or URI
+ * Supports:
+ * - https://open.spotify.com/album/15FZlljjgimILw4hn7urFj
+ * - https://open.spotify.com/album/15FZlljjgimILw4hn7urFj?si=...
+ * - spotify:album:15FZlljjgimILw4hn7urFj
+ * @param url - The Spotify URL or URI to parse
+ * @returns The album ID if found, null otherwise
+ */
+export function parseSpotifyAlbumUrl(url: string | null | undefined): string | null {
+	if (!url) return null;
+
+	// Remove whitespace
+	const trimmedUrl = url.trim();
+
+	// Handle Spotify URI format (spotify:album:id)
+	const uriMatch = trimmedUrl.match(/spotify:album:([a-zA-Z0-9]+)/);
+	if (uriMatch?.[1]) {
+		return uriMatch[1];
+	}
+
+	// Handle HTTP/HTTPS URLs
+	const urlMatch = trimmedUrl.match(
+		/(?:https?:\/\/)?(?:open\.)?spotify\.com\/album\/([a-zA-Z0-9]+)/,
+	);
+	if (urlMatch?.[1]) {
+		return urlMatch[1];
+	}
+
+	return null;
+}
+
+/**
  * Extracts the track ID from a Deezer URL
  * Supports:
  * - https://www.deezer.com/track/123456789
@@ -63,9 +95,7 @@ export function parseDeezerUrl(url: string | null | undefined): string | null {
 	}
 
 	// Handle shortened Deezer links: link.deezer.com/s/{shortCode}
-	const shortMatch = trimmedUrl.match(
-		/(?:https?:\/\/)?link\.deezer\.com\/s\/([a-zA-Z0-9]+)/,
-	);
+	const shortMatch = trimmedUrl.match(/(?:https?:\/\/)?link\.deezer\.com\/s\/([a-zA-Z0-9]+)/);
 	if (shortMatch?.[1]) {
 		return `short:${shortMatch[1]}`;
 	}
@@ -85,14 +115,11 @@ export function detectPlatform(url: string | null | undefined): PlatformType {
 
 	// Check Spotify
 	if (trimmedUrl.includes('spotify.com') || trimmedUrl.startsWith('spotify:')) {
-		return parseSpotifyUrl(trimmedUrl) ? 'spotify' : null;
+		return parseSpotifyUrl(trimmedUrl) || parseSpotifyAlbumUrl(trimmedUrl) ? 'spotify' : null;
 	}
 
 	// Check Deezer
-	if (
-		trimmedUrl.includes('deezer.com') ||
-		trimmedUrl.includes('link.deezer.com')
-	) {
+	if (trimmedUrl.includes('deezer.com') || trimmedUrl.includes('link.deezer.com')) {
 		return parseDeezerUrl(trimmedUrl) ? 'deezer' : null;
 	}
 
@@ -105,7 +132,7 @@ export function detectPlatform(url: string | null | undefined): PlatformType {
  * @returns True if the URL is valid, false otherwise
  */
 export function isValidSpotifyUrl(url: string | null | undefined): boolean {
-	return parseSpotifyUrl(url) !== null;
+	return parseSpotifyUrl(url) !== null || parseSpotifyAlbumUrl(url) !== null;
 }
 
 /**

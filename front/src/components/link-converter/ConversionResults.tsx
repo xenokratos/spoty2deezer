@@ -1,15 +1,17 @@
 import { useTranslation } from 'react-i18next';
-import type { SourceTrack } from '../../types/converter.types';
-import type { DeezerTrack } from '../../types/deezer.types';
+import type { SourceAlbum, SourceTrack } from '../../types/converter.types';
+import type { DeezerAlbum, DeezerTrack } from '../../types/deezer.types';
 import type { YouTubeMusicTrack } from '../../types/youtubeMusic.types';
 import { DeezerMatchList } from '../common/DeezerMatchList';
 import { SourceTrackCard } from '../common/SourceTrackCard';
 import { YouTubeMusicMatchList } from '../common/YouTubeMusicMatchList';
 
 interface ConversionResultsProps {
-	sourceTrack: SourceTrack;
+	sourceTrack?: SourceTrack;
+	sourceAlbum?: SourceAlbum;
 	sourcePlatform: 'spotify' | 'deezer';
 	deezerMatches: DeezerTrack[];
+	deezerAlbumMatches?: DeezerAlbum[];
 	youtubeMatches: YouTubeMusicTrack[];
 	onClear: () => void;
 	onOpenURL: (url: string) => void;
@@ -18,26 +20,41 @@ interface ConversionResultsProps {
 
 export const ConversionResults = ({
 	sourceTrack,
+	sourceAlbum,
 	sourcePlatform,
 	deezerMatches,
+	deezerAlbumMatches,
 	youtubeMatches,
 	onClear,
 	onOpenURL,
 	onCopyToClipboard,
 }: ConversionResultsProps) => {
 	const { t } = useTranslation();
+
+	// Determine if we have a track or album
+	const hasTrack = !!sourceTrack;
+	const hasAlbum = !!sourceAlbum;
+	const totalDeezerMatches = deezerMatches.length + (deezerAlbumMatches?.length || 0);
+
 	return (
 		<div className="mb-8">
 			{/* Header */}
 			<div className="mb-6">
-				<h2 className="text-4xl font-black text-gray-900 mb-2">
-					{t('results.title')}
-				</h2>
+				<h2 className="text-4xl font-black text-gray-900 mb-2">{t('results.title')}</h2>
 				<p className="text-gray-600 text-base">
 					{sourcePlatform === 'spotify' &&
+						hasTrack &&
 						t('results.spotify.matches', {
 							count: deezerMatches.length,
 							plural: deezerMatches.length !== 1 ? 'es' : '',
+							youtubeCount: youtubeMatches.length,
+							youtubePlural: youtubeMatches.length !== 1 ? 'es' : '',
+						})}
+					{sourcePlatform === 'spotify' &&
+						hasAlbum &&
+						t('results.spotify.albumMatches', {
+							count: totalDeezerMatches,
+							plural: totalDeezerMatches !== 1 ? 'es' : '',
 							youtubeCount: youtubeMatches.length,
 							youtubePlural: youtubeMatches.length !== 1 ? 'es' : '',
 						})}
@@ -49,17 +66,109 @@ export const ConversionResults = ({
 				</p>
 			</div>
 
-			{/* Source Track */}
-			<SourceTrackCard track={sourceTrack} />
+			{/* Source Content */}
+			{hasTrack && sourceTrack && <SourceTrackCard track={sourceTrack} />}
+			{hasAlbum && sourceAlbum && (
+				<div className="bg-white rounded-lg shadow-md p-6 mb-6">
+					<h3 className="text-xl font-bold text-gray-900 mb-4">Album</h3>
+					<div className="flex items-center gap-4">
+						{(sourceAlbum as any).images?.[0]?.url && (
+							<img
+								src={(sourceAlbum as any).images[0].url}
+								alt={(sourceAlbum as any).name || (sourceAlbum as any).title}
+								className="w-20 h-20 rounded-lg object-cover"
+							/>
+						)}
+						<div>
+							<h4 className="text-lg font-semibold text-gray-900">
+								{(sourceAlbum as any).name || (sourceAlbum as any).title}
+							</h4>
+							<p className="text-gray-600">
+								{(sourceAlbum as any).artists?.join(', ') || (sourceAlbum as any).artist}
+							</p>
+							{(sourceAlbum as any).total_tracks && (
+								<p className="text-sm text-gray-500">{(sourceAlbum as any).total_tracks} tracks</p>
+							)}
+						</div>
+					</div>
+				</div>
+			)}
 
 			{/* Results - Show the two target platforms */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
 				{/* First Target Platform */}
 				<div>
-					{sourcePlatform === 'spotify' && (
+					{sourcePlatform === 'spotify' && hasTrack && (
 						<>
 							<h3 className="text-2xl font-bold text-secondary mb-4">
 								{t('platform.deezer')} Matches
+							</h3>
+							<DeezerMatchList
+								matches={deezerMatches}
+								onOpenURL={onOpenURL}
+								onCopyToClipboard={onCopyToClipboard}
+							/>
+						</>
+					)}
+					{sourcePlatform === 'spotify' &&
+						hasAlbum &&
+						deezerAlbumMatches &&
+						deezerAlbumMatches.length > 0 && (
+							<>
+								<h3 className="text-2xl font-bold text-secondary mb-4">
+									{t('platform.deezer')} Album Matches
+								</h3>
+								<div className="flex flex-col gap-2">
+									<p className="text-gray-600 text-sm font-semibold uppercase tracking-wider px-2 mb-2">
+										{deezerAlbumMatches.length === 1
+											? t('results.topMatch')
+											: t('results.otherMatches')}
+									</p>
+									{deezerAlbumMatches.map((album, index) => (
+										<button
+											key={album.id}
+											type="button"
+											onClick={() => onOpenURL(album.link)}
+											className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${index === 0 ? 'bg-green-50 border-2 border-secondary' : 'bg-white shadow'
+												}`}
+										>
+											<div className="flex items-center gap-3 flex-1 min-w-0">
+												{album.cover && (
+													<img
+														src={album.cover}
+														alt={album.title}
+														className="w-10 h-10 rounded flex-shrink-0"
+													/>
+												)}
+												<div className="flex flex-col justify-center flex-1 min-w-0">
+													<p className="text-sm font-medium text-gray-900 truncate">
+														{album.title}
+													</p>
+													<p className="text-gray-600 text-xs truncate">{album.artist}</p>
+												</div>
+											</div>
+											<div className="flex items-center gap-2 flex-shrink-0">
+												<button
+													type="button"
+													onClick={(e) => {
+														e.stopPropagation();
+														onCopyToClipboard(album.link);
+													}}
+													className="hover:scale-110 transition-transform"
+												>
+													<span className="text-secondary text-xl">📋</span>
+												</button>
+												<span className="text-secondary text-xl">✓</span>
+											</div>
+										</button>
+									))}
+								</div>
+							</>
+						)}
+					{sourcePlatform === 'spotify' && hasAlbum && deezerMatches.length > 0 && (
+						<>
+							<h3 className="text-2xl font-bold text-secondary mb-4">
+								{t('platform.deezer')} Track Matches
 							</h3>
 							<DeezerMatchList
 								matches={deezerMatches}

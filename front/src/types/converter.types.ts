@@ -2,13 +2,14 @@
  * Converter component type definitions
  */
 
-import type { DeezerTrack } from './deezer.types';
-import type { SpotifyTrack } from './spotify.types';
+import type { DeezerAlbum, DeezerTrack } from './deezer.types';
+import type { SpotifyAlbum, SpotifyTrack } from './spotify.types';
 import type { YouTubeMusicTrack } from './youtubeMusic.types';
 
 export type PlatformType = 'spotify' | 'deezer';
 
 export type SourceTrack = SpotifyTrack | DeezerTrack;
+export type SourceAlbum = SpotifyAlbum | DeezerAlbum;
 
 export interface ConversionResult {
 	source: SourceTrack;

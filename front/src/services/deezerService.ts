@@ -1,6 +1,9 @@
 import * as cheerio from 'cheerio';
 import levenshtein from 'fast-levenshtein';
 import type {
+	DeezerAlbum,
+	DeezerApiAlbum,
+	DeezerApiSearchResponse,
 	DeezerApiTrack,
 	DeezerSearchResponse,
 	DeezerTrack,
@@ -60,26 +63,15 @@ class DeezerService {
 		} catch (error) {
 			const axiosError = error as any;
 			if (axiosError.response?.status === 404) {
-				throw new Error(
-					'Track not found on Deezer. Please verify the URL is correct.',
-				);
+				throw new Error('Track not found on Deezer. Please verify the URL is correct.');
 			}
-			if (
-				axiosError.response?.status === 403 ||
-				axiosError.response?.status === 401
-			) {
+			if (axiosError.response?.status === 403 || axiosError.response?.status === 401) {
 				throw new Error('Unable to access Deezer. Please try again later.');
 			}
-			if (
-				axiosError.code === 'ECONNABORTED' ||
-				axiosError.code === 'ETIMEDOUT'
-			) {
-				throw new Error(
-					'Connection timeout. Please check your internet connection and try again.',
-				);
+			if (axiosError.code === 'ECONNABORTED' || axiosError.code === 'ETIMEDOUT') {
+				throw new Error('Connection timeout. Please check your internet connection and try again.');
 			}
-			const errorMessage =
-				error instanceof Error ? error.message : 'Unknown error occurred';
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 			throw new Error(`Failed to fetch track from Deezer: ${errorMessage}`);
 		}
 	}
@@ -103,18 +95,12 @@ class DeezerService {
 			const $ = cheerio.load(responseData);
 
 			// Extract track information from meta tags using cheerio
-			const title =
-				$('meta[property="og:title"]').attr('content') || 'Unknown Track';
-			const ogDescription =
-				$('meta[property="og:description"]').attr('content') || '';
-			const twitterCreator =
-				$('meta[property="twitter:creator"]').attr('content') || '';
+			const title = $('meta[property="og:title"]').attr('content') || 'Unknown Track';
+			const ogDescription = $('meta[property="og:description"]').attr('content') || '';
+			const twitterCreator = $('meta[property="twitter:creator"]').attr('content') || '';
 			const cover = $('meta[property="og:image"]').attr('content') || '';
-			const duration = parseInt(
-				$('meta[property="music:duration"]').attr('content') || '0',
-			);
-			const preview =
-				$('meta[property="music:preview_url:url"]').attr('content') || '';
+			const duration = parseInt($('meta[property="music:duration"]').attr('content') || '0');
+			const preview = $('meta[property="music:preview_url:url"]').attr('content') || '';
 
 			// Parse artist and additional info from og:description (format: "Artist - titre - year")
 			let artist = twitterCreator || 'Unknown Artist';
@@ -196,12 +182,7 @@ class DeezerService {
 	 */
 	private calculateSimilarity(str1: string, str2: string): number {
 		// Handle undefined or null strings
-		if (
-			!str1 ||
-			!str2 ||
-			typeof str1 !== 'string' ||
-			typeof str2 !== 'string'
-		) {
+		if (!str1 || !str2 || typeof str1 !== 'string' || typeof str2 !== 'string') {
 			return 0;
 		}
 
@@ -248,31 +229,17 @@ class DeezerService {
 			});
 
 			// Check if response contains error
-			if (
-				rawResponse &&
-				typeof rawResponse === 'object' &&
-				'error' in rawResponse
-			) {
-				throw new Error(
-					(rawResponse as any).error.message || 'Deezer API error',
-				);
+			if (rawResponse && typeof rawResponse === 'object' && 'error' in rawResponse) {
+				throw new Error((rawResponse as any).error.message || 'Deezer API error');
 			}
 
 			// Type assertion for successful response
 			const data = rawResponse as DeezerSearchResponse;
 
-			console.log(
-				'Deezer search response received, data length:',
-				data?.data?.length || 'unknown',
-			);
+			console.log('Deezer search response received, data length:', data?.data?.length || 'unknown');
 
 			// Validate response structure
-			if (
-				!data ||
-				typeof data !== 'object' ||
-				!('data' in data) ||
-				!Array.isArray(data.data)
-			) {
+			if (!data || typeof data !== 'object' || !('data' in data) || !Array.isArray(data.data)) {
 				throw new Error('Invalid response structure from Deezer API');
 			}
 
@@ -288,22 +255,13 @@ class DeezerService {
 			}));
 		} catch (error) {
 			const axiosError = error as any;
-			if (
-				axiosError.response?.status === 403 ||
-				axiosError.response?.status === 401
-			) {
+			if (axiosError.response?.status === 403 || axiosError.response?.status === 401) {
 				throw new Error('Unable to search Deezer. Please try again later.');
 			}
-			if (
-				axiosError.code === 'ECONNABORTED' ||
-				axiosError.code === 'ETIMEDOUT'
-			) {
-				throw new Error(
-					'Connection timeout. Please check your internet connection and try again.',
-				);
+			if (axiosError.code === 'ECONNABORTED' || axiosError.code === 'ETIMEDOUT') {
+				throw new Error('Connection timeout. Please check your internet connection and try again.');
 			}
-			const errorMessage =
-				error instanceof Error ? error.message : 'Unknown error occurred';
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 			throw new Error(`Failed to search tracks on Deezer: ${errorMessage}`);
 		}
 	}
@@ -331,8 +289,7 @@ class DeezerService {
 		const allMatches: ScoredTrack[] = [];
 
 		for (const query of searchQueries) {
-			if (!query || query.trim() === '' || query.includes('undefined'))
-				continue;
+			if (!query || query.trim() === '' || query.includes('undefined')) continue;
 
 			try {
 				const results = await this.searchTrack(query, 3); // Reduced to 3 results
@@ -382,7 +339,7 @@ class DeezerService {
 
 		// If no artist info from Spotify, use title-only matching with lower threshold
 		const hasArtist = artists.length > 0 && artists[0];
-		const threshold = hasArtist ? 70 : 50; // Lower threshold when no artist available
+		const threshold = 40;
 
 		const matches: ScoredTrack[] = [];
 
@@ -393,23 +350,14 @@ class DeezerService {
 
 			if (hasArtist && artists[0] && result.artist) {
 				// Standard matching with artist
-				const artistSimilarity = this.calculateSimilarity(
-					artists[0],
-					result.artist,
-				);
-				const titleSimilarity = this.calculateSimilarity(
-					name,
-					result.title || '',
-				);
+				const artistSimilarity = this.calculateSimilarity(artists[0], result.artist);
+				const titleSimilarity = this.calculateSimilarity(name, result.title || '');
 
 				// Weighted score: artist is slightly more important
 				score = artistSimilarity * 0.55 + titleSimilarity * 0.45;
 			} else {
 				// Title-only matching (when no artist from Spotify)
-				const titleSimilarity = this.calculateSimilarity(
-					name,
-					result.title || '',
-				);
+				const titleSimilarity = this.calculateSimilarity(name, result.title || '');
 
 				// Check if Spotify title is contained in Deezer title (for partial matches)
 				const normalizedSpotify = this.normalizeString(name);
@@ -439,9 +387,7 @@ class DeezerService {
 				typeof sourceTrack.duration === 'number' &&
 				result.duration
 			) {
-				const durationDiff = Math.abs(
-					sourceTrack.duration / 1000 - result.duration,
-				);
+				const durationDiff = Math.abs(sourceTrack.duration / 1000 - result.duration);
 				if (durationDiff < 5) {
 					score += 5;
 				} else if (durationDiff < 15) {
@@ -456,6 +402,153 @@ class DeezerService {
 		}
 
 		return matches;
+	}
+
+	/**
+	 * Get album information by album ID using Deezer API
+	 * @param albumId - The Deezer album ID
+	 * @returns Album information
+	 * @throws Error if album is not found or fetch fails
+	 */
+	async getAlbum(albumId: string): Promise<DeezerAlbum> {
+		try {
+			const albumUrl = `${this.baseURL}/album/${albumId}`;
+
+			// Use fetchWithProxy for CORS handling with automatic fallback
+			const data = await fetchWithProxy<DeezerApiAlbum>(albumUrl, {
+				timeout: 15000, // Increased timeout
+			});
+			if (!data || typeof data !== 'object' || !data.id || !data.title) {
+				throw new Error('Invalid album data from Deezer API');
+			}
+
+			// Handle different response structures
+			const artist = data.artist?.name || 'Unknown Artist';
+
+			return {
+				id: data.id,
+				title: data.title,
+				artist: artist,
+				cover: data.cover_medium || '',
+				link: data.link,
+				tracks:
+					data.tracks?.data?.map((track) => ({
+						id: track.id,
+						title: track.title,
+						artist: track.artist?.name || '',
+						album: data.title,
+						duration: track.duration,
+						preview: track.preview,
+						link: track.link,
+						cover: data.cover_medium || '',
+					})) || [],
+				images: data.cover_medium ? [{ url: data.cover_medium }] : [],
+				name: data.title,
+				artists: artist ? [artist] : [],
+				total_tracks: data.nb_tracks,
+			};
+		} catch (error) {
+			const axiosError = error as any;
+			if (axiosError.response?.status === 404) {
+				throw new Error('Album not found on Deezer. Please verify the URL is correct.');
+			}
+			if (axiosError.response?.status === 403 || axiosError.response?.status === 401) {
+				throw new Error('Unable to access Deezer. Please try again later.');
+			}
+			if (axiosError.code === 'ECONNABORTED' || axiosError.code === 'ETIMEDOUT') {
+				throw new Error('Connection timeout. Please check your internet connection and try again.');
+			}
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+			throw new Error(`Failed to fetch album from Deezer: ${errorMessage}`);
+		}
+	}
+
+	/**
+	 * Find album matches on Deezer based on Spotify album information
+	 * @param sourceAlbum - The Spotify album to find matches for
+	 * @returns Array of matching Deezer albums (up to 5 best matches)
+	 */
+	async findAlbumMatches(sourceAlbum: any): Promise<DeezerAlbum[]> {
+		try {
+			// Search for the album using the search endpoint
+			const searchQuery = encodeURIComponent(
+				`${sourceAlbum.name} ${sourceAlbum.artists.join(' ')}`,
+			);
+			const searchUrl = `${this.baseURL}/search/album?q=${searchQuery}&limit=10`;
+
+			const data = await fetchWithProxy<DeezerApiSearchResponse>(searchUrl, {
+				timeout: 15000,
+			});
+
+			if (!data || !data.data || !Array.isArray(data.data)) {
+				return [];
+			}
+
+			// Score and filter matches
+			const matches: { album: DeezerAlbum; score: number }[] = [];
+
+			for (const result of data.data) {
+				if (!result || typeof result !== 'object' || !result.id || !result.title) {
+					continue;
+				}
+
+				let score = 0;
+				const threshold = 40; // Lower threshold for more inclusive matching
+
+				// Artist similarity (most important)
+				const artistSimilarity = this.calculateSimilarity(
+					sourceAlbum.artists.join(' '),
+					result.artist?.name || '',
+				);
+
+				// Title similarity
+				const titleSimilarity = this.calculateSimilarity(sourceAlbum.name, result.title);
+
+				// Combined score with more lenient weighting
+				score = artistSimilarity * 0.6 + titleSimilarity * 0.4;
+
+				// Bonus for exact or very close artist match
+				if (artistSimilarity > 85) {
+					score += 15;
+				} else if (artistSimilarity > 70) {
+					score += 10;
+				}
+
+				// Bonus for title matches that are very close
+				if (titleSimilarity > 80) {
+					score += 5;
+				}
+
+				// Accept matches with dynamic threshold
+				if (score >= threshold) {
+					matches.push({
+						album: {
+							id: result.id,
+							title: result.title,
+							artist: result.artist?.name || 'Unknown Artist',
+							cover: result.cover_medium || '',
+							link: result.link,
+							tracks: [], // We'll fetch tracks separately if needed
+							images: result.cover_medium ? [{ url: result.cover_medium }] : [],
+							name: result.title, // Map title to name for compatibility
+							artists: result.artist?.name ? [result.artist.name] : [],
+							total_tracks: result.nb_tracks,
+						},
+						score,
+					});
+				}
+			}
+
+			// Sort by score and return top 5
+			return matches
+				.sort((a, b) => b.score - a.score)
+				.slice(0, 5)
+				.map((match) => match.album);
+		} catch (error) {
+			// Return empty array on error rather than throwing
+			console.warn('Error searching for album matches:', error);
+			return [];
+		}
 	}
 }
 

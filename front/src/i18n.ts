@@ -21,8 +21,9 @@ const resources = {
 			'results.title': 'Conversion Results',
 			'results.spotify.matches':
 				'Found {{count}} Deezer match{{plural}} and {{youtubeCount}} YouTube Music match{{youtubePlural}}.',
-			'results.deezer.matches':
-				'Found {{count}} YouTube Music match{{plural}}.',
+			'results.spotify.albumMatches':
+				'Found {{count}} Deezer album{{plural}} and {{youtubeCount}} YouTube Music album{{youtubePlural}}.',
+			'results.deezer.matches': 'Found {{count}} YouTube Music match{{plural}}.',
 			'results.clearButton': 'Convert Another Track',
 			'results.topMatch': 'Top Match',
 			'results.otherMatches': 'Other Matches',
@@ -45,24 +46,20 @@ const resources = {
 			// Error messages
 			'error.track.notFound.spotify':
 				'Track not found on Spotify. Please verify the URL is correct.',
-			'error.track.notFound.deezer':
-				'Track not found on Deezer. Please verify the URL is correct.',
+			'error.track.notFound.deezer': 'Track not found on Deezer. Please verify the URL is correct.',
 			'error.track.extractFailed.spotify':
 				'Unable to extract track information from Spotify. Please check the URL and try again.',
 			'error.track.extractFailed.deezer':
 				'Unable to extract track information from Deezer. Please check the URL and try again.',
 			'error.connection.timeout':
 				'Connection timeout. Please check your internet connection and try again.',
-			'error.service.unavailable':
-				'Service temporarily unavailable. Please try again later.',
+			'error.service.unavailable': 'Service temporarily unavailable. Please try again later.',
 			'error.noMatches.deezer':
 				'No matching tracks found on Deezer. Try adjusting the search terms or check if the track exists on Deezer.',
 			'error.noMatches.youtube':
 				'No matching tracks found on YouTube Music. Try searching manually with the track details.',
-			'error.invalid.url.spotify':
-				'Invalid Spotify URL. Please check the format and try again.',
-			'error.invalid.url.deezer':
-				'Invalid Deezer URL. Please check the format and try again.',
+			'error.invalid.url.spotify': 'Invalid Spotify URL. Please check the format and try again.',
+			'error.invalid.url.deezer': 'Invalid Deezer URL. Please check the format and try again.',
 			'error.unknown': 'An unexpected error occurred. Please try again.',
 
 			// Footer
@@ -81,14 +78,15 @@ const resources = {
 			'form.placeholder': "Collez n'importe quel lien Spotify ou Deezer...",
 			'form.convertButton': "Convertir vers d'autres plateformes",
 			'form.convertButton.loading': 'Conversion en cours...',
-			'form.error.empty':
-				'Veuillez entrer une URL Spotify ou Deezer à convertir',
+			'form.error.empty': 'Veuillez entrer une URL Spotify ou Deezer à convertir',
 			'form.error.invalid': 'Veuillez entrer une URL Spotify ou Deezer valide',
 
 			// Results
 			'results.title': 'Résultats de conversion',
 			'results.spotify.matches':
 				'{{count}} correspondance{{plural}} trouvée{{plural}} sur Deezer et {{youtubeCount}} sur YouTube Music.',
+			'results.spotify.albumMatches':
+				'{{count}} album{{plural}} trouvé{{plural}} sur Deezer et {{youtubeCount}} sur YouTube Music.',
 			'results.deezer.matches':
 				'{{count}} correspondance{{plural}} trouvée{{plural}} sur YouTube Music.',
 			'results.clearButton': 'Convertir un autre titre',
@@ -129,10 +127,8 @@ const resources = {
 				'Aucune correspondance trouvée sur YouTube Music. Essayez de rechercher manuellement avec les détails du titre.',
 			'error.invalid.url.spotify':
 				'URL Spotify invalide. Veuillez vérifier le format et réessayer.',
-			'error.invalid.url.deezer':
-				'URL Deezer invalide. Veuillez vérifier le format et réessayer.',
-			'error.unknown':
-				"Une erreur inattendue s'est produite. Veuillez réessayer.",
+			'error.invalid.url.deezer': 'URL Deezer invalide. Veuillez vérifier le format et réessayer.',
+			'error.unknown': "Une erreur inattendue s'est produite. Veuillez réessayer.",
 
 			// Footer
 			'footer.description': 'Fait avec ❤️ pour les amateurs de musique',

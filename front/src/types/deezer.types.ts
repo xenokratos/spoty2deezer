@@ -34,6 +34,39 @@ export interface DeezerSearchResponse {
 	next?: string;
 }
 
+export interface DeezerAlbum {
+	id: number;
+	title: string;
+	artist: string;
+	cover: string;
+	link: string;
+	tracks?: DeezerTrack[];
+	images?: Array<{ url: string }>;
+	name?: string;
+	artists?: string[];
+	total_tracks?: number;
+}
+
+export interface DeezerApiAlbum {
+	id: number;
+	title: string;
+	link: string;
+	cover_medium: string;
+	nb_tracks?: number;
+	artist: {
+		name: string;
+	};
+	tracks?: {
+		data: DeezerApiTrack[];
+	};
+}
+
+export interface DeezerApiSearchResponse {
+	data: DeezerApiAlbum[];
+	total?: number;
+	next?: string;
+}
+
 export interface DeezerApiError {
 	error: {
 		type: string;
@@ -47,8 +80,6 @@ export type DeezerApiResponse = DeezerSearchResponse | DeezerApiError;
 /**
  * Type guard to check if response is an error
  */
-export function isDeezerApiError(
-	response: DeezerApiResponse,
-): response is DeezerApiError {
+export function isDeezerApiError(response: DeezerApiResponse): response is DeezerApiError {
 	return 'error' in response;
 }
