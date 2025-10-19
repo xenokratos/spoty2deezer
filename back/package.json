@@ -27,5 +27,6 @@
 		"deezer"
 	],
 	"author": "Music Converter",
-	"license": "MIT"
+	"license": "MIT",
+	"packageManager": "pnpm@9.15.0"
 }
