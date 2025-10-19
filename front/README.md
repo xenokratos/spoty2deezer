@@ -58,21 +58,13 @@ Create a `.env` file in the root of the frontend directory:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `VITE_DEV_PORT` | `5173` | Development server port |
 | `VITE_PROXY_TARGET` | `http://localhost:3001` | Backend proxy URL for development |
-| `VITE_BASE_PATH` | `/spoty2deezer/` | Base path for the application |
 
 Example `.env` file:
 
 ```bash
-# Development Server Configuration
-VITE_DEV_PORT=5173
-
 # Backend Proxy Configuration
 VITE_PROXY_TARGET=http://localhost:3001
-
-# Application Configuration
-VITE_BASE_PATH=/spoty2deezer/
 ```
 
 ## Supported URL Formats

@@ -88,7 +88,7 @@ export function createProxyUrl(url: string): string {
 		return `/proxy?url=${encodeURIComponent(url)}`;
 	}
 
-	const backendProxyUrl = process.env.VITE_PROXY_TARGET;
+	const backendProxyUrl = import.meta.env.VITE_PROXY_TARGET;
 
 	return `${backendProxyUrl}/proxy?url=${encodeURIComponent(url)}`;
 }

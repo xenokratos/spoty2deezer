@@ -163,9 +163,6 @@ Set these environment variables in your deployment platform:
 - `ALLOWED_DOMAINS` - Comma-separated list of allowed domains
 - `NODE_ENV` - Set to `production`
 
-**Frontend:**
-- `VITE_BASE_PATH` - Set to your deployment path (e.g., `/` for root domain)
-
 ## 🛠️ Development
 
 ### Available Scripts
