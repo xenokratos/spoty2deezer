@@ -31,15 +31,23 @@ jobs:
       with:
         node-version: 20
         cache: pnpm
+        cache-dependency-path: front/pnpm-lock.yaml
 
     - name: Install dependencies
-      run: pnpm install --frozen-lockfile
+      run: |
+        cd front
+        pnpm install --frozen-lockfile
 
     - name: Build project
-      run: pnpm build
+      run: |
+        cd front
+        pnpm build
+
+    - name: List build output
+      run: ls -la front/
 
     - name: Add 404.html (SPA fallback)
-      run: cp dist/index.html dist/404.html
+      run: cp front/dist/index.html front/dist/404.html
 
     - name: Configure Pages
       uses: actions/configure-pages@v5
@@ -47,7 +55,7 @@ jobs:
     - name: Upload build output
       uses: actions/upload-pages-artifact@v3
       with:
-        path: dist
+        path: front/dist
 
   deploy:
     needs: build
@@ -59,7 +67,3 @@ jobs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
-
-defaults:
-  run:
-    working-directory: ./front

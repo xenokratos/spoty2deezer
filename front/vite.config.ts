@@ -15,7 +15,7 @@ export default defineConfig({
 			},
 		},
 	},
-	base: process.env.VITE_BASE_PATH,
+	base: process.env.VITE_BASE_PATH || '/spoty2deezer/',
 	build: {
 		chunkSizeWarningLimit: 1000,
 	},
