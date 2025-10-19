@@ -2,11 +2,7 @@
 	"compilerOptions": {
 		"target": "ES2020",
 		"useDefineForClassFields": true,
-		"lib": [
-			"ES2020",
-			"DOM",
-			"DOM.Iterable"
-		],
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
 		"module": "ESNext",
 		"skipLibCheck": true,
 		"moduleResolution": "bundler",
@@ -20,14 +16,7 @@
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedIndexedAccess": true,
-		"types": [
-			"vite/client",
-			"node",
-			"vite"
-		]
+		"types": ["vite/client", "node", "vite"]
 	},
-	"include": [
-		"src",
-		"./src/vite-env.d.ts"
-	]
+	"include": ["src"]
 }
