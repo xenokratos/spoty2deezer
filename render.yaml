@@ -4,10 +4,8 @@ services:
   env: node
   rootDir: back
   buildCommand: |
-    corepack enable
-    corepack install
-    pnpm install --prod --frozen-lockfile
-  startCommand: pnpm start
+    npm install
+  startCommand: npm run start
   plan: free
   healthCheckPath: /health
   envVars:

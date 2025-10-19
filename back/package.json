@@ -28,5 +28,5 @@
 	],
 	"author": "Music Converter",
 	"license": "MIT",
-	"packageManager": "pnpm@9.15.0"
+	"packageManager": "npm@10.9.0"
 }
