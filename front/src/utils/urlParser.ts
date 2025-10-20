@@ -3,7 +3,7 @@
  * Supports various URL formats for both platforms
  */
 
-export type PlatformType = 'spotify' | 'deezer' | null;
+export type PlatformType = 'spotify' | 'deezer' | 'youtubeMusic' | null;
 
 /**
  * Extracts the track ID from a Spotify URL or URI
@@ -70,6 +70,62 @@ export function parseSpotifyAlbumUrl(url: string | null | undefined): string | n
 }
 
 /**
+ * Extracts the track ID from a YouTube Music URL
+ * Supports:
+ * - https://music.youtube.com/watch?v=dQw4w9WgXcQ
+ * - https://www.youtube.com/watch?v=dQw4w9WgXcQ (standard YouTube link for music)
+ * - https://m.youtube.com/watch?v=dQw4w9WgXcQ
+ * @param url - The YouTube Music URL to parse
+ * @returns The track ID if found, null otherwise
+ */
+export function parseYouTubeMusicUrl(url: string | null | undefined): string | null {
+	if (!url) return null;
+
+	const trimmedUrl = url.trim();
+
+	// Handle YouTube Music track URLs (music.youtube.com/watch?v=...)
+	const musicUrlMatch = trimmedUrl.match(
+		/(?:https?:\/\/)?(?:music\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
+	);
+	if (musicUrlMatch?.[1]) {
+		return musicUrlMatch[1];
+	}
+
+	// Handle standard YouTube track URLs that might be music (www.youtube.com/watch?v=...)
+	const standardUrlMatch = trimmedUrl.match(
+		/(?:https?:\/\/)?(?:www\.|m\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
+	);
+	if (standardUrlMatch?.[1]) {
+		return standardUrlMatch[1];
+	}
+
+	return null;
+}
+
+/**
+ * Extracts the album ID from a YouTube Music URL
+ * Supports:
+ * - https://music.youtube.com/playlist?list=OLAK5uy_kQy9r-i2-...
+ * @param url - The YouTube Music URL to parse
+ * @returns The album ID if found, null otherwise
+ */
+export function parseYouTubeMusicAlbumUrl(url: string | null | undefined): string | null {
+	if (!url) return null;
+
+	const trimmedUrl = url.trim();
+
+	// Handle YouTube Music playlist/album URLs
+	const albumUrlMatch = trimmedUrl.match(
+		/(?:https?:\/\/)?(?:music\.)?youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/,
+	);
+	if (albumUrlMatch?.[1]) {
+		return albumUrlMatch[1];
+	}
+
+	return null;
+}
+
+/**
  * Extracts the track ID from a Deezer URL
  * Supports:
  * - https://www.deezer.com/track/123456789
@@ -123,6 +179,13 @@ export function detectPlatform(url: string | null | undefined): PlatformType {
 		return parseDeezerUrl(trimmedUrl) ? 'deezer' : null;
 	}
 
+	// Check YouTube Music
+	if (trimmedUrl.includes('youtube.com') || trimmedUrl.includes('music.youtube.com')) {
+		return parseYouTubeMusicUrl(trimmedUrl) || parseYouTubeMusicAlbumUrl(trimmedUrl)
+			? 'youtubeMusic'
+			: null;
+	}
+
 	return null;
 }
 
@@ -142,6 +205,15 @@ export function isValidSpotifyUrl(url: string | null | undefined): boolean {
  */
 export function isValidDeezerUrl(url: string | null | undefined): boolean {
 	return parseDeezerUrl(url) !== null;
+}
+
+/**
+ * Validates if a string is a valid YouTube Music URL
+ * @param url - The URL to validate
+ * @returns True if the URL is valid, false otherwise
+ */
+export function isValidYouTubeMusicUrl(url: string | null | undefined): boolean {
+	return parseYouTubeMusicUrl(url) !== null || parseYouTubeMusicAlbumUrl(url) !== null;
 }
 
 /**
