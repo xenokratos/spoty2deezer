@@ -1,8 +1,8 @@
-import deezerService from '../services/deezerService';
-import youtubeMusicService from '../services/youtubeMusicService';
-import type { DeezerTrack } from '../types/deezer.types';
-import type { YouTubeMusicTrack } from '../types/youtubeMusic.types';
-import { parseDeezerUrl } from '../utils/urlParser';
+import deezerService from "../services/deezerService";
+import youtubeMusicService from "../services/youtubeMusicService";
+import type { DeezerTrack } from "../types/deezer.types";
+import type { YouTubeMusicTrack } from "../types/youtubeMusic.types";
+import { parseDeezerUrl } from "../utils/urlParser";
 
 /**
  * Result interface for Deezer to YouTube Music conversions
@@ -31,7 +31,7 @@ export const useDeezerToYouTubeMusic = () => {
 		const trackId = parseDeezerUrl(deezerUrl);
 		if (!trackId) {
 			return Promise.reject(
-				new Error('Invalid Deezer URL. Please check the format and try again.'),
+				new Error("Invalid Deezer URL. Please check the format and try again."),
 			);
 		}
 
@@ -46,7 +46,7 @@ export const useDeezerToYouTubeMusic = () => {
 					if (youtubeMatches.length === 0) {
 						return Promise.reject(
 							new Error(
-								'No matching tracks found on YouTube Music. Try searching manually with the track details.',
+								"No matching tracks found on YouTube Music. Try searching manually with the track details.",
 							),
 						);
 					}

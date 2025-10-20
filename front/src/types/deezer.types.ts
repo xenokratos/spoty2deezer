@@ -11,6 +11,7 @@ export interface DeezerTrack {
 	preview: string;
 	link: string;
 	cover: string;
+	isHighQuality?: boolean;
 }
 
 export interface DeezerApiTrack {
@@ -45,6 +46,7 @@ export interface DeezerAlbum {
 	name?: string;
 	artists?: string[];
 	total_tracks?: number;
+	isHighQuality?: boolean;
 }
 
 export interface DeezerApiAlbum {
@@ -80,6 +82,8 @@ export type DeezerApiResponse = DeezerSearchResponse | DeezerApiError;
 /**
  * Type guard to check if response is an error
  */
-export function isDeezerApiError(response: DeezerApiResponse): response is DeezerApiError {
-	return 'error' in response;
+export function isDeezerApiError(
+	response: DeezerApiResponse,
+): response is DeezerApiError {
+	return "error" in response;
 }

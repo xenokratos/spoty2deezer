@@ -27,4 +27,5 @@ export interface YouTubeMusicTrack {
 	thumbnail: string;
 	images: Array<{ url: string }>;
 	external_urls: { youtube: string };
+	isHighQuality?: boolean;
 }

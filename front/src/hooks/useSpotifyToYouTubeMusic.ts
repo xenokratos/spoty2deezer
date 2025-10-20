@@ -1,8 +1,8 @@
-import spotifyService from '../services/spotifyService';
-import youtubeMusicService from '../services/youtubeMusicService';
-import type { SpotifyAlbum, SpotifyTrack } from '../types/spotify.types';
-import type { YouTubeMusicTrack } from '../types/youtubeMusic.types';
-import { parseSpotifyAlbumUrl, parseSpotifyUrl } from '../utils/urlParser';
+import spotifyService from "../services/spotifyService";
+import youtubeMusicService from "../services/youtubeMusicService";
+import type { SpotifyAlbum, SpotifyTrack } from "../types/spotify.types";
+import type { YouTubeMusicTrack } from "../types/youtubeMusic.types";
+import { parseSpotifyAlbumUrl, parseSpotifyUrl } from "../utils/urlParser";
 
 /**
  * Result interface for Spotify to YouTube Music conversions
@@ -29,7 +29,9 @@ export const useSpotifyToYouTubeMusic = () => {
 	 * @returns Promise resolving to conversion result with Spotify content and YouTube Music search links
 	 * @throws Error if URL is invalid or no search links can be generated
 	 */
-	const convert = (spotifyUrl: string): Promise<YouTubeMusicConversionResult> => {
+	const convert = (
+		spotifyUrl: string,
+	): Promise<YouTubeMusicConversionResult> => {
 		const trackId = parseSpotifyUrl(spotifyUrl);
 		const albumId = parseSpotifyAlbumUrl(spotifyUrl);
 
@@ -42,7 +44,7 @@ export const useSpotifyToYouTubeMusic = () => {
 						if (youtubeMatches.length === 0) {
 							return Promise.reject(
 								new Error(
-									'No matching tracks found on YouTube Music. Try searching manually with the track details.',
+									"No matching tracks found on YouTube Music. Try searching manually with the track details.",
 								),
 							);
 						}
@@ -62,7 +64,9 @@ export const useSpotifyToYouTubeMusic = () => {
 			});
 		} else {
 			return Promise.reject(
-				new Error('Invalid Spotify URL. Please check the format and try again.'),
+				new Error(
+					"Invalid Spotify URL. Please check the format and try again.",
+				),
 			);
 		}
 	};

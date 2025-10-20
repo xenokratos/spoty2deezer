@@ -1,5 +1,5 @@
-import * as cheerio from 'cheerio';
-import levenshtein from 'fast-levenshtein';
+import * as cheerio from "cheerio";
+import levenshtein from "fast-levenshtein";
 import type {
 	DeezerAlbum,
 	DeezerApiAlbum,
@@ -7,19 +7,28 @@ import type {
 	DeezerApiTrack,
 	DeezerSearchResponse,
 	DeezerTrack,
-} from '../types/deezer.types';
-import { fetchWithProxy } from '../utils/responseWrapper';
+} from "../types/deezer.types";
+import { fetchWithProxy } from "../utils/responseWrapper";
 
 interface ScoredTrack {
 	track: DeezerTrack;
 	score: number;
+	isHighQuality?: boolean;
+}
+
+/**
+ * Result interface for track matching with threshold-based filtering
+ */
+interface MatchingResults {
+	highQuality: DeezerTrack[];
+	exploreMore: DeezerTrack[];
 }
 
 /**
  * Service for interacting with Deezer API using axios with responseWrapper for CORS handling
  */
 class DeezerService {
-	private readonly baseURL = 'https://api.deezer.com';
+	private readonly baseURL = "https://api.deezer.com";
 
 	/**
 	 * Get track information by track ID using Deezer API
@@ -30,7 +39,7 @@ class DeezerService {
 	async getTrack(trackId: string): Promise<DeezerTrack> {
 		try {
 			// Handle shortened Deezer links
-			if (trackId.startsWith('short:')) {
+			if (trackId.startsWith("short:")) {
 				const shortCode = trackId.substring(6); // Remove 'short:' prefix
 				return this.getTrackFromShortLink(shortCode);
 			}
@@ -41,14 +50,14 @@ class DeezerService {
 			const data = await fetchWithProxy<DeezerApiTrack>(trackUrl, {
 				timeout: 15000, // Increased timeout
 			});
-			if (!data || typeof data !== 'object' || !data.id || !data.title) {
-				throw new Error('Invalid track data from Deezer API');
+			if (!data || typeof data !== "object" || !data.id || !data.title) {
+				throw new Error("Invalid track data from Deezer API");
 			}
 
 			// Handle different response structures
-			const artist = data.artist?.name || 'Unknown Artist';
-			const album = data.album?.title || '';
-			const cover = data.album?.cover_medium || '';
+			const artist = data.artist?.name || "Unknown Artist";
+			const album = data.album?.title || "";
+			const cover = data.album?.cover_medium || "";
 
 			return {
 				id: data.id,
@@ -61,17 +70,31 @@ class DeezerService {
 				cover: cover,
 			};
 		} catch (error) {
-			const axiosError = error as any;
+			const axiosError = error as {
+				response?: { status?: number };
+				code?: string;
+			};
 			if (axiosError.response?.status === 404) {
-				throw new Error('Track not found on Deezer. Please verify the URL is correct.');
+				throw new Error(
+					"Track not found on Deezer. Please verify the URL is correct.",
+				);
 			}
-			if (axiosError.response?.status === 403 || axiosError.response?.status === 401) {
-				throw new Error('Unable to access Deezer. Please try again later.');
+			if (
+				axiosError.response?.status === 403 ||
+				axiosError.response?.status === 401
+			) {
+				throw new Error("Unable to access Deezer. Please try again later.");
 			}
-			if (axiosError.code === 'ECONNABORTED' || axiosError.code === 'ETIMEDOUT') {
-				throw new Error('Connection timeout. Please check your internet connection and try again.');
+			if (
+				axiosError.code === "ECONNABORTED" ||
+				axiosError.code === "ETIMEDOUT"
+			) {
+				throw new Error(
+					"Connection timeout. Please check your internet connection and try again.",
+				);
 			}
-			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+			const errorMessage =
+				error instanceof Error ? error.message : "Unknown error occurred";
 			throw new Error(`Failed to fetch track from Deezer: ${errorMessage}`);
 		}
 	}
@@ -95,36 +118,42 @@ class DeezerService {
 			const $ = cheerio.load(responseData);
 
 			// Extract track information from meta tags using cheerio
-			const title = $('meta[property="og:title"]').attr('content') || 'Unknown Track';
-			const ogDescription = $('meta[property="og:description"]').attr('content') || '';
-			const twitterCreator = $('meta[property="twitter:creator"]').attr('content') || '';
-			const cover = $('meta[property="og:image"]').attr('content') || '';
-			const duration = parseInt($('meta[property="music:duration"]').attr('content') || '0');
-			const preview = $('meta[property="music:preview_url:url"]').attr('content') || '';
+			const title =
+				$('meta[property="og:title"]').attr("content") || "Unknown Track";
+			const ogDescription =
+				$('meta[property="og:description"]').attr("content") || "";
+			const twitterCreator =
+				$('meta[property="twitter:creator"]').attr("content") || "";
+			const cover = $('meta[property="og:image"]').attr("content") || "";
+			const duration = parseInt(
+				$('meta[property="music:duration"]').attr("content") || "0",
+			);
+			const preview =
+				$('meta[property="music:preview_url:url"]').attr("content") || "";
 
 			// Parse artist and additional info from og:description (format: "Artist - titre - year")
-			let artist = twitterCreator || 'Unknown Artist';
+			let artist = twitterCreator || "Unknown Artist";
 			if (ogDescription && !twitterCreator) {
-				const descParts = ogDescription.split(' - ');
+				const descParts = ogDescription.split(" - ");
 				if (descParts.length >= 1) {
-					artist = descParts[0] || 'Unknown Artist';
+					artist = descParts[0] || "Unknown Artist";
 				}
 			}
 
 			// Try to extract track ID from the page using cheerio
-			let trackId = '0';
-			const scriptContent = $('script').html();
+			let trackId = "0";
+			const scriptContent = $("script").html();
 			if (scriptContent) {
 				const trackIdMatch = scriptContent.match(/SNG_ID":"(\d+)"/);
-				trackId = trackIdMatch?.[1] || '0';
+				trackId = trackIdMatch?.[1] || "0";
 			}
 
 			// If we found a track ID, try to get full track data
-			if (trackId && trackId !== '0') {
+			if (trackId && trackId !== "0") {
 				try {
 					return this.getTrack(trackId);
 				} catch (_error) {
-					console.log('Failed to fetch full track data, using parsed info');
+					console.log("Failed to fetch full track data, using parsed info");
 				}
 			}
 
@@ -133,25 +162,25 @@ class DeezerService {
 				id: parseInt(trackId) || 0,
 				title: title,
 				artist: artist,
-				album: '', // Not easily extractable from this page
+				album: "", // Not easily extractable from this page
 				duration: duration,
 				preview: preview,
 				link: shortUrl,
 				cover: cover,
 			};
 		} catch (error) {
-			console.error('Error resolving shortened Deezer link:', error);
+			console.error("Error resolving shortened Deezer link:", error);
 
 			// Fallback: Return a generic track that will be matched by the search algorithms
 			return {
 				id: 0,
-				title: 'Unknown Track',
-				artist: 'Unknown Artist',
-				album: '',
+				title: "Unknown Track",
+				artist: "Unknown Artist",
+				album: "",
 				duration: 0,
-				preview: '',
+				preview: "",
 				link: `https://link.deezer.com/s/${shortCode}`,
-				cover: '',
+				cover: "",
 			};
 		}
 	}
@@ -162,15 +191,15 @@ class DeezerService {
 	 * @returns Normalized string
 	 */
 	private normalizeString(str: string): string {
-		if (!str || typeof str !== 'string') {
-			return '';
+		if (!str || typeof str !== "string") {
+			return "";
 		}
 		return str
 			.toLowerCase()
-			.replace(/\s*\(.*?\)\s*/g, '') // Remove content in parentheses (feat., remix, etc.)
-			.replace(/\s*\[.*?\]\s*/g, '') // Remove content in brackets
-			.replace(/[^\w\s]/g, '') // Remove special characters
-			.replace(/\s+/g, ' ') // Normalize spaces
+			.replace(/\s*\(.*?\)\s*/g, "") // Remove content in parentheses (feat., remix, etc.)
+			.replace(/\s*\[.*?\]\s*/g, "") // Remove content in brackets
+			.replace(/[^\w\s]/g, "") // Remove special characters
+			.replace(/\s+/g, " ") // Normalize spaces
 			.trim();
 	}
 
@@ -182,7 +211,12 @@ class DeezerService {
 	 */
 	private calculateSimilarity(str1: string, str2: string): number {
 		// Handle undefined or null strings
-		if (!str1 || !str2 || typeof str1 !== 'string' || typeof str2 !== 'string') {
+		if (
+			!str1 ||
+			!str2 ||
+			typeof str1 !== "string" ||
+			typeof str2 !== "string"
+		) {
 			return 0;
 		}
 
@@ -211,14 +245,14 @@ class DeezerService {
 	async searchTrack(query: string, limit = 10): Promise<DeezerTrack[]> {
 		try {
 			// Validate query
-			if (!query || query.trim() === '' || query.includes('undefined')) {
-				throw new Error('Invalid search query provided');
+			if (!query || query.trim() === "" || query.includes("undefined")) {
+				throw new Error("Invalid search query provided");
 			}
 
 			const params = new URLSearchParams({
 				q: query.trim(),
 				limit: String(Math.min(limit, 5)), // Limit to max 5 results to avoid large responses
-				strict: 'on', // Strict search to get better matches
+				strict: "on", // Strict search to get better matches
 			});
 
 			const searchUrl = `${this.baseURL}/search?${params}`;
@@ -229,47 +263,73 @@ class DeezerService {
 			});
 
 			// Check if response contains error
-			if (rawResponse && typeof rawResponse === 'object' && 'error' in rawResponse) {
-				throw new Error((rawResponse as any).error.message || 'Deezer API error');
+			if (
+				rawResponse &&
+				typeof rawResponse === "object" &&
+				"error" in rawResponse
+			) {
+				throw new Error(
+					(rawResponse as any).error.message || "Deezer API error",
+				);
 			}
 
 			// Type assertion for successful response
 			const data = rawResponse as DeezerSearchResponse;
 
-			console.log('Deezer search response received, data length:', data?.data?.length || 'unknown');
+			console.log(
+				"Deezer search response received, data length:",
+				data?.data?.length || "unknown",
+			);
 
 			// Validate response structure
-			if (!data || typeof data !== 'object' || !('data' in data) || !Array.isArray(data.data)) {
-				throw new Error('Invalid response structure from Deezer API');
+			if (
+				!data ||
+				typeof data !== "object" ||
+				!("data" in data) ||
+				!Array.isArray(data.data)
+			) {
+				throw new Error("Invalid response structure from Deezer API");
 			}
 
 			return data.data.map((track: DeezerApiTrack) => ({
 				id: track.id,
 				title: track.title,
-				artist: track.artist?.name || 'Unknown Artist',
-				album: track.album?.title || '',
+				artist: track.artist?.name || "Unknown Artist",
+				album: track.album?.title || "",
 				duration: track.duration,
 				preview: track.preview,
 				link: track.link,
-				cover: track.album?.cover_medium || '',
+				cover: track.album?.cover_medium || "",
 			}));
 		} catch (error) {
-			const axiosError = error as any;
-			if (axiosError.response?.status === 403 || axiosError.response?.status === 401) {
-				throw new Error('Unable to search Deezer. Please try again later.');
+			const axiosError = error as {
+				response?: { status?: number };
+				code?: string;
+			};
+			if (
+				axiosError.response?.status === 403 ||
+				axiosError.response?.status === 401
+			) {
+				throw new Error("Unable to search Deezer. Please try again later.");
 			}
-			if (axiosError.code === 'ECONNABORTED' || axiosError.code === 'ETIMEDOUT') {
-				throw new Error('Connection timeout. Please check your internet connection and try again.');
+			if (
+				axiosError.code === "ECONNABORTED" ||
+				axiosError.code === "ETIMEDOUT"
+			) {
+				throw new Error(
+					"Connection timeout. Please check your internet connection and try again.",
+				);
 			}
-			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+			const errorMessage =
+				error instanceof Error ? error.message : "Unknown error occurred";
 			throw new Error(`Failed to search tracks on Deezer: ${errorMessage}`);
 		}
 	}
 
 	/**
-	 * Find best matches for a track on Deezer (up to 5)
+	 * Find best matches for a track on Deezer with threshold-based filtering
 	 * @param sourceTrack - The source track to match (from Spotify or YouTube Music)
-	 * @returns Array of up to 5 best matching Deezer tracks
+	 * @returns Array of Deezer tracks, prioritizing high-quality matches, then explore-more if needed
 	 */
 	async findTrackMatches(sourceTrack: {
 		name: string;
@@ -286,18 +346,23 @@ class DeezerService {
 			name,
 		];
 
-		const allMatches: ScoredTrack[] = [];
+		const allMatches: MatchingResults = {
+			highQuality: [],
+			exploreMore: [],
+		};
 
 		for (const query of searchQueries) {
-			if (!query || query.trim() === '' || query.includes('undefined')) continue;
+			if (!query || query.trim() === "" || query.includes("undefined"))
+				continue;
 
 			try {
 				const results = await this.searchTrack(query, 3); // Reduced to 3 results
 
 				if (results.length > 0) {
-					// Find all good matches
+					// Find all matches and categorize them
 					const matches = this.findBestMatches(results, sourceTrack);
-					allMatches.push(...matches);
+					allMatches.highQuality.push(...matches.highQuality);
+					allMatches.exploreMore.push(...matches.exploreMore);
 				}
 			} catch (searchError) {
 				console.warn(`Search failed for query "${query}":`, searchError);
@@ -305,27 +370,36 @@ class DeezerService {
 			}
 		}
 
-		// Remove duplicates and sort by score
-		const uniqueMatches = new Map<number, ScoredTrack>();
-		for (const match of allMatches) {
-			const existing = uniqueMatches.get(match.track.id);
-			if (!existing || match.score > existing.score) {
-				uniqueMatches.set(match.track.id, match);
-			}
+		// Remove duplicates and sort by score within each category
+		const uniqueHighQuality = new Map<number, DeezerTrack>();
+		const uniqueExploreMore = new Map<number, DeezerTrack>();
+
+		// Process high-quality matches first
+		for (const track of allMatches.highQuality) {
+			uniqueHighQuality.set(track.id, track);
 		}
 
-		// Sort by score and return top 5
-		return Array.from(uniqueMatches.values())
-			.sort((a, b) => b.score - a.score)
-			.slice(0, 5)
-			.map((m) => m.track);
+		// Process explore-more matches
+		for (const track of allMatches.exploreMore) {
+			uniqueExploreMore.set(track.id, track);
+		}
+
+		// Return high-quality matches first, then explore-more if no high-quality matches exist
+		if (uniqueHighQuality.size > 0) {
+			return Array.from(uniqueHighQuality.values()).slice(0, 5);
+		} else if (uniqueExploreMore.size > 0) {
+			// Mark explore-more results for special handling in UI
+			return Array.from(uniqueExploreMore.values()).slice(0, 5);
+		}
+
+		return [];
 	}
 
 	/**
-	 * Find the best matching tracks from search results
+	 * Find the best matching tracks from search results, separating high-quality and explore-more results
 	 * @param results - Array of Deezer search results
 	 * @param sourceTrack - The source track to match against (from Spotify or YouTube Music)
-	 * @returns Array of scored tracks that meet the threshold
+	 * @returns MatchingResults with highQuality and exploreMore arrays
 	 */
 	private findBestMatches(
 		results: DeezerTrack[],
@@ -334,14 +408,15 @@ class DeezerService {
 			artists: string[];
 			images?: Array<{ url: string }>;
 		},
-	): ScoredTrack[] {
+	): MatchingResults {
 		const { name, artists } = sourceTrack;
 
 		// If no artist info from Spotify, use title-only matching with lower threshold
 		const hasArtist = artists.length > 0 && artists[0];
 		const threshold = 40;
 
-		const matches: ScoredTrack[] = [];
+		const highQuality: ScoredTrack[] = [];
+		const exploreMore: ScoredTrack[] = [];
 
 		for (const result of results) {
 			if (!result) continue;
@@ -350,18 +425,27 @@ class DeezerService {
 
 			if (hasArtist && artists[0] && result.artist) {
 				// Standard matching with artist
-				const artistSimilarity = this.calculateSimilarity(artists[0], result.artist);
-				const titleSimilarity = this.calculateSimilarity(name, result.title || '');
+				const artistSimilarity = this.calculateSimilarity(
+					artists[0],
+					result.artist,
+				);
+				const titleSimilarity = this.calculateSimilarity(
+					name,
+					result.title || "",
+				);
 
 				// Weighted score: artist is slightly more important
 				score = artistSimilarity * 0.55 + titleSimilarity * 0.45;
 			} else {
 				// Title-only matching (when no artist from Spotify)
-				const titleSimilarity = this.calculateSimilarity(name, result.title || '');
+				const titleSimilarity = this.calculateSimilarity(
+					name,
+					result.title || "",
+				);
 
 				// Check if Spotify title is contained in Deezer title (for partial matches)
 				const normalizedSpotify = this.normalizeString(name);
-				const normalizedDeezer = this.normalizeString(result.title || '');
+				const normalizedDeezer = this.normalizeString(result.title || "");
 
 				if (normalizedSpotify && normalizedDeezer) {
 					const isPartialMatch =
@@ -381,13 +465,15 @@ class DeezerService {
 
 			// Bonus for duration match (if available)
 			if (
-				'duration' in sourceTrack &&
+				"duration" in sourceTrack &&
 				sourceTrack.duration !== undefined &&
 				sourceTrack.duration !== null &&
-				typeof sourceTrack.duration === 'number' &&
+				typeof sourceTrack.duration === "number" &&
 				result.duration
 			) {
-				const durationDiff = Math.abs(sourceTrack.duration / 1000 - result.duration);
+				const durationDiff = Math.abs(
+					sourceTrack.duration / 1000 - result.duration,
+				);
 				if (durationDiff < 5) {
 					score += 5;
 				} else if (durationDiff < 15) {
@@ -395,13 +481,24 @@ class DeezerService {
 				}
 			}
 
-			// Accept matches with dynamic threshold
+			// Categorize matches based on threshold
 			if (score >= threshold) {
-				matches.push({ track: result, score });
+				highQuality.push({ track: result, score, isHighQuality: true });
+			} else {
+				exploreMore.push({ track: result, score, isHighQuality: false });
 			}
 		}
 
-		return matches;
+		return {
+			highQuality: highQuality.map((m) => ({
+				...m.track,
+				isHighQuality: true,
+			})),
+			exploreMore: exploreMore.map((m) => ({
+				...m.track,
+				isHighQuality: false,
+			})),
+		};
 	}
 
 	/**
@@ -418,29 +515,29 @@ class DeezerService {
 			const data = await fetchWithProxy<DeezerApiAlbum>(albumUrl, {
 				timeout: 15000, // Increased timeout
 			});
-			if (!data || typeof data !== 'object' || !data.id || !data.title) {
-				throw new Error('Invalid album data from Deezer API');
+			if (!data || typeof data !== "object" || !data.id || !data.title) {
+				throw new Error("Invalid album data from Deezer API");
 			}
 
 			// Handle different response structures
-			const artist = data.artist?.name || 'Unknown Artist';
+			const artist = data.artist?.name || "Unknown Artist";
 
 			return {
 				id: data.id,
 				title: data.title,
 				artist: artist,
-				cover: data.cover_medium || '',
+				cover: data.cover_medium || "",
 				link: data.link,
 				tracks:
 					data.tracks?.data?.map((track) => ({
 						id: track.id,
 						title: track.title,
-						artist: track.artist?.name || '',
+						artist: track.artist?.name || "",
 						album: data.title,
 						duration: track.duration,
 						preview: track.preview,
 						link: track.link,
-						cover: data.cover_medium || '',
+						cover: data.cover_medium || "",
 					})) || [],
 				images: data.cover_medium ? [{ url: data.cover_medium }] : [],
 				name: data.title,
@@ -448,31 +545,45 @@ class DeezerService {
 				total_tracks: data.nb_tracks,
 			};
 		} catch (error) {
-			const axiosError = error as any;
+			const axiosError = error as {
+				response?: { status?: number };
+				code?: string;
+			};
 			if (axiosError.response?.status === 404) {
-				throw new Error('Album not found on Deezer. Please verify the URL is correct.');
+				throw new Error(
+					"Album not found on Deezer. Please verify the URL is correct.",
+				);
 			}
-			if (axiosError.response?.status === 403 || axiosError.response?.status === 401) {
-				throw new Error('Unable to access Deezer. Please try again later.');
+			if (
+				axiosError.response?.status === 403 ||
+				axiosError.response?.status === 401
+			) {
+				throw new Error("Unable to access Deezer. Please try again later.");
 			}
-			if (axiosError.code === 'ECONNABORTED' || axiosError.code === 'ETIMEDOUT') {
-				throw new Error('Connection timeout. Please check your internet connection and try again.');
+			if (
+				axiosError.code === "ECONNABORTED" ||
+				axiosError.code === "ETIMEDOUT"
+			) {
+				throw new Error(
+					"Connection timeout. Please check your internet connection and try again.",
+				);
 			}
-			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+			const errorMessage =
+				error instanceof Error ? error.message : "Unknown error occurred";
 			throw new Error(`Failed to fetch album from Deezer: ${errorMessage}`);
 		}
 	}
 
 	/**
-	 * Find album matches on Deezer based on Spotify album information
+	 * Find album matches on Deezer based on Spotify album information with threshold-based filtering
 	 * @param sourceAlbum - The Spotify album to find matches for
-	 * @returns Array of matching Deezer albums (up to 5 best matches)
+	 * @returns Array of matching Deezer albums, prioritizing high-quality matches, then explore-more if needed
 	 */
 	async findAlbumMatches(sourceAlbum: any): Promise<DeezerAlbum[]> {
 		try {
 			// Search for the album using the search endpoint
 			const searchQuery = encodeURIComponent(
-				`${sourceAlbum.name} ${sourceAlbum.artists.join(' ')}`,
+				`${sourceAlbum.name} ${sourceAlbum.artists.join(" ")}`,
 			);
 			const searchUrl = `${this.baseURL}/search/album?q=${searchQuery}&limit=10`;
 
@@ -485,24 +596,34 @@ class DeezerService {
 			}
 
 			// Score and filter matches
-			const matches: { album: DeezerAlbum; score: number }[] = [];
+			const highQualityMatches: { album: DeezerAlbum; score: number }[] = [];
+			const exploreMoreMatches: { album: DeezerAlbum; score: number }[] = [];
+
+			const threshold = 40; // Lower threshold for more inclusive matching
 
 			for (const result of data.data) {
-				if (!result || typeof result !== 'object' || !result.id || !result.title) {
+				if (
+					!result ||
+					typeof result !== "object" ||
+					!result.id ||
+					!result.title
+				) {
 					continue;
 				}
 
 				let score = 0;
-				const threshold = 40; // Lower threshold for more inclusive matching
 
 				// Artist similarity (most important)
 				const artistSimilarity = this.calculateSimilarity(
-					sourceAlbum.artists.join(' '),
-					result.artist?.name || '',
+					sourceAlbum.artists.join(" "),
+					result.artist?.name || "",
 				);
 
 				// Title similarity
-				const titleSimilarity = this.calculateSimilarity(sourceAlbum.name, result.title);
+				const titleSimilarity = this.calculateSimilarity(
+					sourceAlbum.name,
+					result.title,
+				);
 
 				// Combined score with more lenient weighting
 				score = artistSimilarity * 0.6 + titleSimilarity * 0.4;
@@ -519,34 +640,50 @@ class DeezerService {
 					score += 5;
 				}
 
-				// Accept matches with dynamic threshold
+				const album: DeezerAlbum = {
+					id: result.id,
+					title: result.title,
+					artist: result.artist?.name || "Unknown Artist",
+					cover: result.cover_medium || "",
+					link: result.link,
+					tracks: [], // We'll fetch tracks separately if needed
+					images: result.cover_medium ? [{ url: result.cover_medium }] : [],
+					name: result.title, // Map title to name for compatibility
+					artists: result.artist?.name ? [result.artist.name] : [],
+					total_tracks: result.nb_tracks,
+				};
+
+				// Categorize matches based on threshold
 				if (score >= threshold) {
-					matches.push({
-						album: {
-							id: result.id,
-							title: result.title,
-							artist: result.artist?.name || 'Unknown Artist',
-							cover: result.cover_medium || '',
-							link: result.link,
-							tracks: [], // We'll fetch tracks separately if needed
-							images: result.cover_medium ? [{ url: result.cover_medium }] : [],
-							name: result.title, // Map title to name for compatibility
-							artists: result.artist?.name ? [result.artist.name] : [],
-							total_tracks: result.nb_tracks,
-						},
+					highQualityMatches.push({
+						album: { ...album, isHighQuality: true },
+						score,
+					});
+				} else {
+					exploreMoreMatches.push({
+						album: { ...album, isHighQuality: false },
 						score,
 					});
 				}
 			}
 
-			// Sort by score and return top 5
-			return matches
-				.sort((a, b) => b.score - a.score)
-				.slice(0, 5)
-				.map((match) => match.album);
+			// Return high-quality matches first, then explore-more if no high-quality matches exist
+			if (highQualityMatches.length > 0) {
+				return highQualityMatches
+					.sort((a, b) => b.score - a.score)
+					.slice(0, 5)
+					.map((match) => match.album);
+			} else if (exploreMoreMatches.length > 0) {
+				return exploreMoreMatches
+					.sort((a, b) => b.score - a.score)
+					.slice(0, 5)
+					.map((match) => match.album);
+			}
+
+			return [];
 		} catch (error) {
 			// Return empty array on error rather than throwing
-			console.warn('Error searching for album matches:', error);
+			console.warn("Error searching for album matches:", error);
 			return [];
 		}
 	}

@@ -1,5 +1,22 @@
-import type { SpotifyAlbum } from '../types/spotify.types';
-import type { YouTubeMusicTrack } from '../types/youtubeMusic.types';
+import type { SpotifyAlbum } from "../types/spotify.types";
+import type { YouTubeMusicTrack } from "../types/youtubeMusic.types";
+import { fetchWithProxy } from "../utils/responseWrapper";
+
+interface YouTubeOEmbedResponse {
+	title: string;
+	author_name: string;
+	author_url: string;
+	type: string;
+	height: number;
+	width: number;
+	version: string;
+	provider_name: string;
+	provider_url: string;
+	thumbnail_height: number;
+	thumbnail_width: number;
+	thumbnail_url: string;
+	html: string;
+}
 
 /**
  * Service for generating YouTube Music search links and track information
@@ -14,44 +31,72 @@ class YouTubeMusicService {
 	 * @returns Normalized string
 	 */
 	private normalizeForSearch(str: string): string {
-		if (!str || typeof str !== 'string') {
-			return '';
+		if (!str || typeof str !== "string") {
+			return "";
 		}
 
 		return str
-			.replace(/\s*\(feat\..*?\)/gi, '') // Remove feat. annotations
-			.replace(/\s*\[.*?\]\s*/g, '') // Remove content in brackets
-			.replace(/\s*\(.*?\)\s*/g, '') // Remove content in parentheses
+			.replace(/\s*\(feat\..*?\)/gi, "") // Remove feat. annotations
+			.replace(/\s*\[.*?\]\s*/g, "") // Remove content in brackets
+			.replace(/\s*\(.*?\)\s*/g, "") // Remove content in parentheses
 			.trim();
 	}
 
 	/**
-	 * Get track information by video ID using axios (no external services)
+	 * Get track information by video ID using YouTube oEmbed API
 	 * @param videoId - The YouTube video ID
 	 * @returns Track information
 	 * @throws Error if track is not found or fetch fails
 	 */
 	async getTrack(videoId: string): Promise<YouTubeMusicTrack> {
 		try {
-			// Since we can't scrape YouTube due to CORS,
-			// we'll return a generic track that will be matched by search algorithms
-			// The user can manually visit the link to get the actual track info
+			// Use YouTube's oEmbed API to get real track information
+			const oembedUrl = `https://www.youtube.com/oembed?url=https://music.youtube.com/watch?v=${videoId}&format=json`;
+
+			// Fetch through our proxy service
+			const oembedData = await fetchWithProxy<YouTubeOEmbedResponse>(
+				oembedUrl,
+				{
+					timeout: 10000,
+				},
+			);
+
+			// Parse title and artist from the oEmbed response
+			const title = oembedData.title || "Unknown Track";
+			const author = oembedData.author_name || "Unknown Artist";
 
 			return {
 				id: videoId,
-				name: 'Track from YouTube Music',
-				artists: ['Unknown Artist'],
-				channel: 'Unknown Channel',
+				name: title,
+				artists: [author],
+				channel: author,
 				url: `https://music.youtube.com/watch?v=${videoId}`,
-				thumbnail: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
-				images: [{ url: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` }],
+				thumbnail: oembedData.thumbnail_url,
+				images: [{ url: oembedData.thumbnail_url }],
 				external_urls: {
 					youtube: `https://music.youtube.com/watch?v=${videoId}`,
 				},
 			};
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-			throw new Error(`Failed to fetch track from YouTube: ${errorMessage}`);
+			// Fallback to generic track if oEmbed fails
+			console.warn(
+				"Failed to fetch YouTube track info, using generic data:",
+				error,
+			);
+			return {
+				id: videoId,
+				name: "Track from YouTube Music",
+				artists: ["Unknown Artist"],
+				channel: "Unknown Channel",
+				url: `https://music.youtube.com/watch?v=${videoId}`,
+				thumbnail: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+				images: [
+					{ url: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` },
+				],
+				external_urls: {
+					youtube: `https://music.youtube.com/watch?v=${videoId}`,
+				},
+			};
 		}
 	}
 
@@ -65,8 +110,9 @@ class YouTubeMusicService {
 		images?: Array<{ url: string }>;
 	}): Promise<YouTubeMusicTrack[]> {
 		const { name, artists, images } = spotifyTrack;
-		const artist = artists[0] || '';
-		const thumbnail = images?.[0]?.url || 'https://i.ytimg.com/vi/default/mqdefault.jpg';
+		const artist = artists[0] || "";
+		const thumbnail =
+			images?.[0]?.url || "https://i.ytimg.com/vi/default/mqdefault.jpg";
 
 		// Normalize track name and artist for better search results
 		const cleanTrackName = this.normalizeForSearch(name);
@@ -76,7 +122,9 @@ class YouTubeMusicService {
 
 		// Primary search: Artist + Track Name
 		if (cleanArtist && cleanTrackName) {
-			const primaryQuery = encodeURIComponent(`${cleanArtist} ${cleanTrackName}`);
+			const primaryQuery = encodeURIComponent(
+				`${cleanArtist} ${cleanTrackName}`,
+			);
 			results.push({
 				id: `search-${Date.now()}-1`,
 				name: cleanTrackName,
@@ -88,10 +136,13 @@ class YouTubeMusicService {
 				external_urls: {
 					youtube: `https://music.youtube.com/search?q=${primaryQuery}`,
 				},
+				isHighQuality: true,
 			});
 
 			// Alternative: Search with "official audio" for better match
-			const officialQuery = encodeURIComponent(`${cleanArtist} ${cleanTrackName} official audio`);
+			const officialQuery = encodeURIComponent(
+				`${cleanArtist} ${cleanTrackName} official audio`,
+			);
 			results.push({
 				id: `search-${Date.now()}-2`,
 				name: `${cleanTrackName}`,
@@ -103,10 +154,13 @@ class YouTubeMusicService {
 				external_urls: {
 					youtube: `https://music.youtube.com/search?q=${officialQuery}`,
 				},
+				isHighQuality: true,
 			});
 
 			// Alternative: Try with YouTube main search (often has more results)
-			const youtubeQuery = encodeURIComponent(`${cleanArtist} ${cleanTrackName}`);
+			const youtubeQuery = encodeURIComponent(
+				`${cleanArtist} ${cleanTrackName}`,
+			);
 			results.push({
 				id: `search-${Date.now()}-3`,
 				name: cleanTrackName,
@@ -118,6 +172,7 @@ class YouTubeMusicService {
 				external_urls: {
 					youtube: `https://www.youtube.com/results?search_query=${youtubeQuery}`,
 				},
+				isHighQuality: false, // Mark as explore-more since it uses main YouTube search
 			});
 		} else if (cleanTrackName) {
 			// Fallback: Track name only if artist is missing
@@ -125,14 +180,15 @@ class YouTubeMusicService {
 			results.push({
 				id: `search-${Date.now()}-fallback`,
 				name: cleanTrackName,
-				artists: ['Unknown'],
-				channel: 'Various Artists',
+				artists: ["Unknown"],
+				channel: "Various Artists",
 				url: `https://music.youtube.com/search?q=${fallbackQuery}`,
 				thumbnail,
 				images: [{ url: thumbnail }],
 				external_urls: {
 					youtube: `https://music.youtube.com/search?q=${fallbackQuery}`,
 				},
+				isHighQuality: false, // Mark as explore-more since artist is missing
 			});
 		}
 
@@ -170,8 +226,9 @@ class YouTubeMusicService {
 	 */
 	findAlbumMatches(sourceAlbum: SpotifyAlbum): Promise<YouTubeMusicTrack[]> {
 		const { name, artists, images } = sourceAlbum;
-		const artist = artists[0] || '';
-		const thumbnail = images?.[0]?.url || 'https://i.ytimg.com/vi/default/mqdefault.jpg';
+		const artist = artists[0] || "";
+		const thumbnail =
+			images?.[0]?.url || "https://i.ytimg.com/vi/default/mqdefault.jpg";
 
 		// Normalize album name and artist for better search results
 		const cleanAlbumName = this.normalizeForSearch(name);
@@ -181,7 +238,9 @@ class YouTubeMusicService {
 
 		// Primary search: Artist + Album Name
 		if (cleanArtist && cleanAlbumName) {
-			const primaryQuery = encodeURIComponent(`${cleanArtist} ${cleanAlbumName} album`);
+			const primaryQuery = encodeURIComponent(
+				`${cleanArtist} ${cleanAlbumName} album`,
+			);
 			results.push({
 				id: `album-search-${Date.now()}-1`,
 				name: cleanAlbumName,
@@ -193,10 +252,13 @@ class YouTubeMusicService {
 				external_urls: {
 					youtube: `https://music.youtube.com/search?q=${primaryQuery}`,
 				},
+				isHighQuality: true,
 			});
 
 			// Alternative: Search for full album
-			const fullAlbumQuery = encodeURIComponent(`${cleanArtist} ${cleanAlbumName} full album`);
+			const fullAlbumQuery = encodeURIComponent(
+				`${cleanArtist} ${cleanAlbumName} full album`,
+			);
 			results.push({
 				id: `album-search-${Date.now()}-2`,
 				name: `${cleanAlbumName} (Full Album)`,
@@ -208,6 +270,7 @@ class YouTubeMusicService {
 				external_urls: {
 					youtube: `https://music.youtube.com/search?q=${fullAlbumQuery}`,
 				},
+				isHighQuality: true,
 			});
 		} else if (cleanAlbumName) {
 			// Fallback: Album name only if artist is missing
@@ -215,14 +278,15 @@ class YouTubeMusicService {
 			results.push({
 				id: `album-search-${Date.now()}-fallback`,
 				name: cleanAlbumName,
-				artists: ['Various Artists'],
-				channel: 'Various Artists',
+				artists: ["Various Artists"],
+				channel: "Various Artists",
 				url: `https://music.youtube.com/search?q=${fallbackQuery}`,
 				thumbnail,
 				images: [{ url: thumbnail }],
 				external_urls: {
 					youtube: `https://music.youtube.com/search?q=${fallbackQuery}`,
 				},
+				isHighQuality: false, // Mark as explore-more since artist is missing
 			});
 		}
 

@@ -1,16 +1,18 @@
-import { useTranslation } from 'react-i18next';
-import type { DeezerTrack } from '../../types/deezer.types';
+import { useTranslation } from "react-i18next";
+import type { DeezerTrack } from "../../types/deezer.types";
 
 interface DeezerMatchListProps {
 	matches: DeezerTrack[];
 	onOpenURL: (url: string) => void;
 	onCopyToClipboard: (text: string) => void;
+	showAsExploreMore?: boolean;
 }
 
 export const DeezerMatchList = ({
 	matches,
 	onOpenURL,
 	onCopyToClipboard,
+	showAsExploreMore = false,
 }: DeezerMatchListProps) => {
 	const { t } = useTranslation();
 	const handleMatchClick = (url: string) => {
@@ -29,9 +31,11 @@ export const DeezerMatchList = ({
 	return (
 		<div className="flex flex-col gap-2">
 			<p className="text-gray-600 text-sm font-semibold uppercase tracking-wider px-2 mb-2">
-				{matches.length === 1
-					? t('results.topMatch')
-					: t('results.otherMatches')}
+				{showAsExploreMore
+					? t("results.exploreMore")
+					: matches.length === 1
+						? t("results.topMatch")
+						: t("results.otherMatches")}
 			</p>
 			{matches.map((match, index) => (
 				<button
@@ -39,9 +43,11 @@ export const DeezerMatchList = ({
 					type="button"
 					onClick={handleMatchClick(match.link)}
 					className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${
-						index === 0
-							? 'bg-green-50 border-2 border-secondary'
-							: 'bg-white shadow'
+						showAsExploreMore
+							? "bg-yellow-50 border-2 border-yellow-300"
+							: index === 0
+								? "bg-green-50 border-2 border-secondary"
+								: "bg-white shadow"
 					}`}
 				>
 					<div className="flex items-center gap-3 flex-1 min-w-0">
@@ -62,14 +68,29 @@ export const DeezerMatchList = ({
 						</div>
 					</div>
 					<div className="flex items-center gap-2 flex-shrink-0">
-						<button
-							type="button"
+						<div
 							onClick={handleCopyClick(match.link)}
-							className="hover:scale-110 transition-transform"
+							className="hover:scale-110 transition-transform cursor-pointer"
+							role="button"
+							tabIndex={0}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" || e.key === " ") {
+									e.preventDefault();
+									handleCopyClick(match.link)(e as any);
+								}
+							}}
 						>
-							<span className="text-secondary text-xl">📋</span>
-						</button>
-						<span className="text-secondary text-xl">✓</span>
+							<span
+								className={`${showAsExploreMore ? "text-yellow-600" : "text-secondary"} text-xl`}
+							>
+								📋
+							</span>
+						</div>
+						<span
+							className={`${showAsExploreMore ? "text-yellow-600" : "text-secondary"} text-xl`}
+						>
+							✓
+						</span>
 					</div>
 				</button>
 			))}

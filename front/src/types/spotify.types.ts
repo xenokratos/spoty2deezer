@@ -20,6 +20,7 @@ export interface SpotifyTrack {
 	duration?: number;
 	external_urls: SpotifyExternalUrls;
 	images: SpotifyImage[];
+	isHighQuality?: boolean;
 }
 
 export interface SpotifyAlbum {
@@ -31,6 +32,7 @@ export interface SpotifyAlbum {
 	total_tracks?: number;
 	external_urls: SpotifyExternalUrls;
 	images: SpotifyImage[];
+	isHighQuality?: boolean;
 }
 
 export interface SpotifyOEmbedResponse {

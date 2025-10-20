@@ -1,70 +1,99 @@
-import { useTranslation } from 'react-i18next';
-import type { SpotifyTrack } from '../../types/spotify.types';
+import { useTranslation } from "react-i18next";
+import type { SpotifyTrack } from "../../types/spotify.types";
 
 interface SpotifyMatchListProps {
-    matches: SpotifyTrack[];
-    onOpenURL: (url: string) => void;
-    onCopyToClipboard: (text: string) => void;
+	matches: SpotifyTrack[];
+	onOpenURL: (url: string) => void;
+	onCopyToClipboard: (text: string) => void;
+	showAsExploreMore?: boolean;
 }
 
 export const SpotifyMatchList = ({
-    matches,
-    onOpenURL,
-    onCopyToClipboard,
+	matches,
+	onOpenURL,
+	onCopyToClipboard,
+	showAsExploreMore = false,
 }: SpotifyMatchListProps) => {
-    const { t } = useTranslation();
+	const { t } = useTranslation();
 
-    if (!matches || matches.length === 0) {
-        return (
-            <p className="text-gray-600 text-base italic">
-                {t('results.noMatches', { platform: t('platform.spotify') })}
-            </p>
-        );
-    }
+	if (!matches || matches.length === 0) {
+		return (
+			<p className="text-gray-600 text-base italic">
+				{t("results.noMatches", { platform: t("platform.spotify") })}
+			</p>
+		);
+	}
 
-    return (
-        <div className="flex flex-col gap-2">
-            <p className="text-gray-600 text-sm font-semibold uppercase tracking-wider px-2 mb-2">
-                {matches.length === 1 ? t('results.topMatch') : t('results.otherMatches')}
-            </p>
-            {matches.map((track, index) => (
-                <button
-                    key={track.id}
-                    type="button"
-                    onClick={() => onOpenURL(track.external_urls.spotify)}
-                    className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${index === 0 ? 'bg-green-50 border-2 border-primary' : 'bg-white shadow'
-                        }`}
-                >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {track.album.images?.[0]?.url && (
-                            <img
-                                src={track.album.images[0].url}
-                                alt={track.name}
-                                className="w-10 h-10 rounded flex-shrink-0"
-                            />
-                        )}
-                        <div className="flex flex-col justify-center flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{track.name}</p>
-                            <p className="text-gray-600 text-xs truncate">
-                                {track.artists.map((artist) => artist.name).join(', ')}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onCopyToClipboard(track.external_urls.spotify);
-                            }}
-                            className="hover:scale-110 transition-transform"
-                        >
-                            <span className="text-primary text-xl">📋</span>
-                        </button>
-                        <span className="text-primary text-xl">✓</span>
-                    </div>
-                </button>
-            ))}
-        </div>
-    );
+	return (
+		<div className="flex flex-col gap-2">
+			<p className="text-gray-600 text-sm font-semibold uppercase tracking-wider px-2 mb-2">
+				{showAsExploreMore
+					? t("results.exploreMore")
+					: matches.length === 1
+						? t("results.topMatch")
+						: t("results.otherMatches")}
+			</p>
+			{matches.map((track, index) => (
+				<button
+					key={track.id}
+					type="button"
+					onClick={() => onOpenURL(track.external_urls.spotify)}
+					className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${
+						showAsExploreMore
+							? "bg-yellow-50 border-2 border-yellow-300"
+							: index === 0
+								? "bg-green-50 border-2 border-primary"
+								: "bg-white shadow"
+					}`}
+				>
+					<div className="flex items-center gap-3 flex-1 min-w-0">
+						{track.images?.[0]?.url && (
+							<img
+								src={track.images[0].url}
+								alt={track.name}
+								className="w-10 h-10 rounded flex-shrink-0"
+							/>
+						)}
+						<div className="flex flex-col justify-center flex-1 min-w-0">
+							<p className="text-sm font-medium text-gray-900 truncate">
+								{track.name}
+							</p>
+							<p className="text-gray-600 text-xs truncate">
+								{track.artists.join(", ")}
+							</p>
+						</div>
+					</div>
+					<div className="flex items-center gap-2 flex-shrink-0">
+						<div
+							onClick={(e) => {
+								e.stopPropagation();
+								onCopyToClipboard(track.external_urls.spotify);
+							}}
+							className="hover:scale-110 transition-transform cursor-pointer"
+							role="button"
+							tabIndex={0}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" || e.key === " ") {
+									e.preventDefault();
+									e.stopPropagation();
+									onCopyToClipboard(track.external_urls.spotify);
+								}
+							}}
+						>
+							<span
+								className={`${showAsExploreMore ? "text-yellow-600" : "text-primary"} text-xl`}
+							>
+								📋
+							</span>
+						</div>
+						<span
+							className={`${showAsExploreMore ? "text-yellow-600" : "text-primary"} text-xl`}
+						>
+							✓
+						</span>
+					</div>
+				</button>
+			))}
+		</div>
+	);
 };

@@ -3,7 +3,7 @@
  * Supports various URL formats for both platforms
  */
 
-export type PlatformType = 'spotify' | 'deezer' | 'youtubeMusic' | null;
+export type PlatformType = "spotify" | "deezer" | "youtubeMusic" | null;
 
 /**
  * Extracts the track ID from a Spotify URL or URI
@@ -46,7 +46,9 @@ export function parseSpotifyUrl(url: string | null | undefined): string | null {
  * @param url - The Spotify URL or URI to parse
  * @returns The album ID if found, null otherwise
  */
-export function parseSpotifyAlbumUrl(url: string | null | undefined): string | null {
+export function parseSpotifyAlbumUrl(
+	url: string | null | undefined,
+): string | null {
 	if (!url) return null;
 
 	// Remove whitespace
@@ -78,7 +80,9 @@ export function parseSpotifyAlbumUrl(url: string | null | undefined): string | n
  * @param url - The YouTube Music URL to parse
  * @returns The track ID if found, null otherwise
  */
-export function parseYouTubeMusicUrl(url: string | null | undefined): string | null {
+export function parseYouTubeMusicUrl(
+	url: string | null | undefined,
+): string | null {
 	if (!url) return null;
 
 	const trimmedUrl = url.trim();
@@ -109,7 +113,9 @@ export function parseYouTubeMusicUrl(url: string | null | undefined): string | n
  * @param url - The YouTube Music URL to parse
  * @returns The album ID if found, null otherwise
  */
-export function parseYouTubeMusicAlbumUrl(url: string | null | undefined): string | null {
+export function parseYouTubeMusicAlbumUrl(
+	url: string | null | undefined,
+): string | null {
 	if (!url) return null;
 
 	const trimmedUrl = url.trim();
@@ -151,7 +157,9 @@ export function parseDeezerUrl(url: string | null | undefined): string | null {
 	}
 
 	// Handle shortened Deezer links: link.deezer.com/s/{shortCode}
-	const shortMatch = trimmedUrl.match(/(?:https?:\/\/)?link\.deezer\.com\/s\/([a-zA-Z0-9]+)/);
+	const shortMatch = trimmedUrl.match(
+		/(?:https?:\/\/)?link\.deezer\.com\/s\/([a-zA-Z0-9]+)/,
+	);
 	if (shortMatch?.[1]) {
 		return `short:${shortMatch[1]}`;
 	}
@@ -170,19 +178,28 @@ export function detectPlatform(url: string | null | undefined): PlatformType {
 	const trimmedUrl = url.trim();
 
 	// Check Spotify
-	if (trimmedUrl.includes('spotify.com') || trimmedUrl.startsWith('spotify:')) {
-		return parseSpotifyUrl(trimmedUrl) || parseSpotifyAlbumUrl(trimmedUrl) ? 'spotify' : null;
+	if (trimmedUrl.includes("spotify.com") || trimmedUrl.startsWith("spotify:")) {
+		return parseSpotifyUrl(trimmedUrl) || parseSpotifyAlbumUrl(trimmedUrl)
+			? "spotify"
+			: null;
 	}
 
 	// Check Deezer
-	if (trimmedUrl.includes('deezer.com') || trimmedUrl.includes('link.deezer.com')) {
-		return parseDeezerUrl(trimmedUrl) ? 'deezer' : null;
+	if (
+		trimmedUrl.includes("deezer.com") ||
+		trimmedUrl.includes("link.deezer.com")
+	) {
+		return parseDeezerUrl(trimmedUrl) ? "deezer" : null;
 	}
 
 	// Check YouTube Music
-	if (trimmedUrl.includes('youtube.com') || trimmedUrl.includes('music.youtube.com')) {
-		return parseYouTubeMusicUrl(trimmedUrl) || parseYouTubeMusicAlbumUrl(trimmedUrl)
-			? 'youtubeMusic'
+	if (
+		trimmedUrl.includes("youtube.com") ||
+		trimmedUrl.includes("music.youtube.com")
+	) {
+		return parseYouTubeMusicUrl(trimmedUrl) ||
+			parseYouTubeMusicAlbumUrl(trimmedUrl)
+			? "youtubeMusic"
 			: null;
 	}
 
@@ -212,8 +229,13 @@ export function isValidDeezerUrl(url: string | null | undefined): boolean {
  * @param url - The URL to validate
  * @returns True if the URL is valid, false otherwise
  */
-export function isValidYouTubeMusicUrl(url: string | null | undefined): boolean {
-	return parseYouTubeMusicUrl(url) !== null || parseYouTubeMusicAlbumUrl(url) !== null;
+export function isValidYouTubeMusicUrl(
+	url: string | null | undefined,
+): boolean {
+	return (
+		parseYouTubeMusicUrl(url) !== null ||
+		parseYouTubeMusicAlbumUrl(url) !== null
+	);
 }
 
 /**

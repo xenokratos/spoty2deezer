@@ -1,24 +1,24 @@
-import { useState } from 'react';
-import { useDeezerToYouTubeMusic } from '../../hooks/useDeezerToYouTubeMusic';
-import { useSpotifyToDeezer } from '../../hooks/useSpotifyToDeezer';
-import { useSpotifyToYouTubeMusic } from '../../hooks/useSpotifyToYouTubeMusic';
-import { useYouTubeMusicToDeezer } from '../../hooks/useYouTubeMusicToDeezer';
-import { useYouTubeMusicToSpotify } from '../../hooks/useYouTubeMusicToSpotify';
-import type { DeezerAlbum, DeezerTrack } from '../../types/deezer.types';
-import type { SpotifyAlbum, SpotifyTrack } from '../../types/spotify.types';
-import type { YouTubeMusicTrack } from '../../types/youtubeMusic.types';
-import { detectPlatform } from '../../utils/urlParser';
-import { ConversionForm } from '../common/ConversionForm';
-import { Footer } from '../common/Footer';
-import { Header } from '../common/Header';
-import { LoadingState } from '../common/LoadingState';
-import { SupportedFormats } from '../common/SupportedFormats';
-import { ConversionResults } from './ConversionResults';
+import { useState } from "react";
+import { useDeezerToYouTubeMusic } from "../../hooks/useDeezerToYouTubeMusic";
+import { useSpotifyToDeezer } from "../../hooks/useSpotifyToDeezer";
+import { useSpotifyToYouTubeMusic } from "../../hooks/useSpotifyToYouTubeMusic";
+import { useYouTubeMusicToDeezer } from "../../hooks/useYouTubeMusicToDeezer";
+import { useYouTubeMusicToSpotify } from "../../hooks/useYouTubeMusicToSpotify";
+import type { DeezerAlbum, DeezerTrack } from "../../types/deezer.types";
+import type { SpotifyAlbum, SpotifyTrack } from "../../types/spotify.types";
+import type { YouTubeMusicTrack } from "../../types/youtubeMusic.types";
+import { detectPlatform } from "../../utils/urlParser";
+import { ConversionForm } from "../common/ConversionForm";
+import { Footer } from "../common/Footer";
+import { Header } from "../common/Header";
+import { LoadingState } from "../common/LoadingState";
+import { SupportedFormats } from "../common/SupportedFormats";
+import { ConversionResults } from "./ConversionResults";
 
 interface ConversionState {
 	sourceTrack?: SpotifyTrack | DeezerTrack | YouTubeMusicTrack;
-	sourceAlbum?: SpotifyAlbum | DeezerAlbum | YouTubeMusicAlbum;
-	sourcePlatform: 'spotify' | 'deezer' | 'youtubeMusic';
+	sourceAlbum?: SpotifyAlbum | DeezerAlbum;
+	sourcePlatform: "spotify" | "deezer" | "youtubeMusic";
 	deezerMatches: DeezerTrack[];
 	deezerAlbumMatches?: DeezerAlbum[];
 	youtubeMatches: YouTubeMusicTrack[];
@@ -27,9 +27,9 @@ interface ConversionState {
 }
 
 export const LinkConverter = () => {
-	const [inputUrl, setInputUrl] = useState<string>('');
+	const [inputUrl, setInputUrl] = useState<string>("");
 	const [loading, setLoading] = useState<boolean>(false);
-	const [error, setError] = useState<string>('');
+	const [error, setError] = useState<string>("");
 	const [result, setResult] = useState<ConversionState | null>(null);
 
 	// Conversion hooks
@@ -41,49 +41,60 @@ export const LinkConverter = () => {
 
 	const handleConvert = (): void => {
 		if (!inputUrl.trim()) {
-			setError('form.error.empty');
+			setError("form.error.empty");
 			return;
 		}
 
 		const platform = detectPlatform(inputUrl);
-		if (!platform || (platform !== 'spotify' && platform !== 'deezer' && platform !== 'youtubeMusic')) {
-			setError('form.error.invalid');
+		if (
+			!platform ||
+			(platform !== "spotify" &&
+				platform !== "deezer" &&
+				platform !== "youtubeMusic")
+		) {
+			setError("form.error.invalid");
 			return;
 		}
 
 		setLoading(true);
-		setError('');
+		setError("");
 		setResult(null);
 
 		// Route to appropriate conversion based on detected platform
 		switch (platform) {
-			case 'spotify':
+			case "spotify":
 				handleSpotifyConversion(inputUrl);
 				break;
-			case 'deezer':
+			case "deezer":
 				handleDeezerConversion(inputUrl);
 				break;
-			case 'youtubeMusic':
+			case "youtubeMusic":
 				handleYouTubeMusicConversion(inputUrl);
 				break;
 		}
 	};
 
 	const handleSpotifyConversion = (url: string): void => {
-		Promise.all([convertSpotifyToDeezer(url), convertSpotifyToYouTubeMusic(url)])
+		Promise.all([
+			convertSpotifyToDeezer(url),
+			convertSpotifyToYouTubeMusic(url),
+		])
 			.then(([deezerResult, youtubeResult]) => {
 				setResult({
 					sourceTrack: deezerResult.spotifyTrack,
 					sourceAlbum: deezerResult.spotifyAlbum,
-					sourcePlatform: 'spotify',
+					sourcePlatform: "spotify",
 					deezerMatches: deezerResult.deezerMatches,
 					deezerAlbumMatches: deezerResult.deezerAlbumMatches,
 					youtubeMatches: youtubeResult.youtubeMatches,
+					spotifyMatches: [],
+					spotifyAlbumMatches: [],
 				});
 				setLoading(false);
 			})
 			.catch((err) => {
-				const errorMessage = err instanceof Error ? err.message : 'error.unknown';
+				const errorMessage =
+					err instanceof Error ? err.message : "error.unknown";
 				setError(errorMessage);
 				setLoading(false);
 			});
@@ -94,14 +105,17 @@ export const LinkConverter = () => {
 			.then((youtubeResult) => {
 				setResult({
 					sourceTrack: youtubeResult.deezerTrack,
-					sourcePlatform: 'deezer',
+					sourcePlatform: "deezer",
 					deezerMatches: [], // No need to show Deezer matches for Deezer source
 					youtubeMatches: youtubeResult.youtubeMatches,
+					spotifyMatches: [],
+					spotifyAlbumMatches: [],
 				});
 				setLoading(false);
 			})
 			.catch((err) => {
-				const errorMessage = err instanceof Error ? err.message : 'error.unknown';
+				const errorMessage =
+					err instanceof Error ? err.message : "error.unknown";
 				setError(errorMessage);
 				setLoading(false);
 			});
@@ -115,31 +129,31 @@ export const LinkConverter = () => {
 			.then(([spotifyResult, deezerResult]) => {
 				setResult({
 					sourceTrack: spotifyResult.youtubeMusicTrack,
-					sourceAlbum: spotifyResult.youtubeMusicAlbum,
-					sourcePlatform: 'youtubeMusic',
+					sourcePlatform: "youtubeMusic",
 					deezerMatches: deezerResult.deezerMatches,
-					deezerAlbumMatches: deezerResult.deezerAlbumMatches,
 					youtubeMatches: [], // No need to show YouTube Music matches for YouTube Music source
 					spotifyMatches: spotifyResult.spotifyMatches,
-					spotifyAlbumMatches: spotifyResult.spotifyAlbumMatches,
+					spotifyAlbumMatches: [],
+					deezerAlbumMatches: [],
 				});
 				setLoading(false);
 			})
 			.catch((err) => {
-				const errorMessage = err instanceof Error ? err.message : 'error.unknown';
+				const errorMessage =
+					err instanceof Error ? err.message : "error.unknown";
 				setError(errorMessage);
 				setLoading(false);
 			});
 	};
 
 	const handleClear = (): void => {
-		setInputUrl('');
-		setError('');
+		setInputUrl("");
+		setError("");
 		setResult(null);
 	};
 
 	const handleOpenURL = (url: string): void => {
-		window.open(url, '_blank', 'noopener,noreferrer');
+		window.open(url, "_blank", "noopener,noreferrer");
 	};
 
 	const handleCopyToClipboard = (text: string): void => {
@@ -177,6 +191,8 @@ export const LinkConverter = () => {
 							deezerMatches={result.deezerMatches}
 							deezerAlbumMatches={result.deezerAlbumMatches}
 							youtubeMatches={result.youtubeMatches}
+							spotifyMatches={result.spotifyMatches || []}
+							spotifyAlbumMatches={result.spotifyAlbumMatches}
 							onClear={handleClear}
 							onOpenURL={handleOpenURL}
 							onCopyToClipboard={handleCopyToClipboard}

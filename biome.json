@@ -1,4 +1,5 @@
 {
+	"root": false,
 	"$schema": "https://biomejs.dev/schemas/2.2.6/schema.json",
 	"formatter": {
 		"enabled": true,
@@ -25,8 +26,15 @@
 	},
 	"javascript": {
 		"formatter": {
+			"jsxQuoteStyle": "double",
+			"quoteProperties": "asNeeded",
+			"trailingCommas": "all",
+			"semicolons": "always",
+			"arrowParentheses": "always",
+			"bracketSameLine": false,
 			"quoteStyle": "single",
-			"semicolons": "always"
+			"attributePosition": "auto",
+			"bracketSpacing": true
 		}
 	},
 	"files": {

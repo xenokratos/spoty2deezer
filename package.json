@@ -9,9 +9,10 @@
 		"build": "cd front && npm run build",
 		"install:all": "npm install && cd front && npm install && cd ../back && npm install",
 		"clean": "rm -rf node_modules front/node_modules back/node_modules front/dist",
-		"lint": "biome check .",
-		"lint:fix": "biome check --write .",
-		"format": "biome format --write ."
+		"clean:dist": "rm -rf front/dist back/dist",
+		"lint": "pnpm clean:dist && biome check",
+		"lint:fix": "pnpm clean:dist && biome check --write .",
+		"format": "pnpm clean:dist && biome format --write ."
 	},
 	"devDependencies": {
 		"concurrently": "^8.2.0",
