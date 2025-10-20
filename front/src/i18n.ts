@@ -26,7 +26,7 @@ const resources = {
 			"results.spotify.albumMatches":
 				"Found {{count}} Deezer album{{plural}} and {{youtubeCount}} YouTube Music album{{youtubePlural}}.",
 			"results.deezer.matches":
-				"Found {{count}} YouTube Music match{{plural}}.",
+				"Found {{spotifyCount}} Spotify match{{spotifyPlural}} and {{youtubeCount}} YouTube Music match{{youtubePlural}}.",
 			"results.youtubeMusic.matches":
 				"Found {{spotifyCount}} Spotify match{{spotifyPlural}} and {{deezerCount}} Deezer match{{deezerPlural}}.",
 			"results.youtubeMusic.albumMatches":
@@ -111,7 +111,7 @@ const resources = {
 			"results.spotify.albumMatches":
 				"{{count}} album{{plural}} trouvé{{plural}} sur Deezer et {{youtubeCount}} sur YouTube Music.",
 			"results.deezer.matches":
-				"{{count}} correspondance{{plural}} trouvée{{plural}} sur YouTube Music.",
+				"{{spotifyCount}} correspondance{{spotifyPlural}} trouvée{{spotifyPlural}} sur Spotify et {{youtubeCount}} sur YouTube Music.",
 			"results.youtubeMusic.matches":
 				"{{spotifyCount}} correspondance{{spotifyPlural}} trouvée{{spotifyPlural}} sur Spotify et {{deezerCount}} sur Deezer.",
 			"results.youtubeMusic.albumMatches":

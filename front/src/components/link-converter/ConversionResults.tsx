@@ -70,9 +70,12 @@ export const ConversionResults = ({
 							youtubePlural: youtubeMatches.length !== 1 ? "es" : "",
 						})}
 					{sourcePlatform === "deezer" &&
+						hasTrack &&
 						t("results.deezer.matches", {
-							count: youtubeMatches.length,
-							plural: youtubeMatches.length !== 1 ? "es" : "",
+							spotifyCount: spotifyMatches.length,
+							spotifyPlural: spotifyMatches.length !== 1 ? "es" : "",
+							youtubeCount: youtubeMatches.length,
+							youtubePlural: youtubeMatches.length !== 1 ? "es" : "",
 						})}
 					{sourcePlatform === "youtubeMusic" &&
 						hasTrack &&
@@ -127,209 +130,93 @@ export const ConversionResults = ({
 
 			{/* Results - Show the two target platforms */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-				{/* First Target Platform */}
-				<div>
-					{sourcePlatform === "spotify" && hasTrack && (
-						<>
-							<h3 className="text-2xl font-bold text-secondary mb-4">
-								{t("platform.deezer")} Matches
-							</h3>
-							<DeezerMatchList
-								matches={deezerMatches}
-								onOpenURL={onOpenURL}
-								onCopyToClipboard={onCopyToClipboard}
-								showAsExploreMore={
-									!deezerMatches.some((m) => m.isHighQuality !== false)
-								}
-							/>
-						</>
-					)}
-					{sourcePlatform === "spotify" &&
-						hasAlbum &&
-						deezerAlbumMatches &&
-						deezerAlbumMatches.length > 0 && (
+				{sourcePlatform !== "spotify" && (
+					<div>
+						{/* Spotify Matches */}
+						{hasTrack && (
 							<>
-								<h3 className="text-2xl font-bold text-secondary mb-4">
-									{t("platform.deezer")} Album Matches
+								<h3 className="text-2xl font-bold text-primary mb-4">
+									{t("platform.spotify")} Matches
 								</h3>
-								<div className="flex flex-col gap-2">
-									<p className="text-gray-600 text-sm font-semibold uppercase tracking-wider px-2 mb-2">
-										{deezerAlbumMatches.length === 1
-											? t("results.topMatch")
-											: t("results.otherMatches")}
-									</p>
-									{deezerAlbumMatches.map((album, index) => (
-										<button
-											key={album.id}
-											type="button"
-											onClick={() => onOpenURL(album.link)}
-											className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${
-												index === 0
-													? "bg-green-50 border-2 border-secondary"
-													: "bg-white shadow"
-											}`}
-										>
-											<div className="flex items-center gap-3 flex-1 min-w-0">
-												{album.cover && (
-													<img
-														src={album.cover}
-														alt={album.title}
-														className="w-10 h-10 rounded flex-shrink-0"
-													/>
-												)}
-												<div className="flex flex-col justify-center flex-1 min-w-0">
-													<p className="text-sm font-medium text-gray-900 truncate">
-														{album.title}
-													</p>
-													<p className="text-gray-600 text-xs truncate">
-														{album.artist}
-													</p>
-												</div>
-											</div>
-											<div className="flex items-center gap-2 flex-shrink-0">
-												<div
-													onClick={(e) => {
-														e.stopPropagation();
-														onCopyToClipboard(album.link);
-													}}
-													className="hover:scale-110 transition-transform cursor-pointer"
-													role="button"
-													tabIndex={0}
-													onKeyDown={(e) => {
-														if (e.key === "Enter" || e.key === " ") {
-															e.preventDefault();
-															e.stopPropagation();
-															// Call onCopyToClipboard directly without event
-															onCopyToClipboard(album.link);
-														}
-													}}
-												>
-													<span className="text-secondary text-xl">📋</span>
-												</div>
-												<span className="text-secondary text-xl">✓</span>
-											</div>
-										</button>
-									))}
-								</div>
-							</>
-						)}
-					{sourcePlatform === "spotify" &&
-						hasAlbum &&
-						deezerMatches.length > 0 && (
-							<>
-								<h3 className="text-2xl font-bold text-secondary mb-4">
-									{t("platform.deezer")} Track Matches
-								</h3>
-								<DeezerMatchList
-									matches={deezerMatches}
+								<SpotifyMatchList
+									matches={spotifyMatches}
 									onOpenURL={onOpenURL}
 									onCopyToClipboard={onCopyToClipboard}
 									showAsExploreMore={
-										!deezerMatches.some((m) => m.isHighQuality !== false)
+										!spotifyMatches.some((m) => m.isHighQuality !== false)
 									}
 								/>
 							</>
 						)}
-					{sourcePlatform === "deezer" && (
-						<>
-							<h3 className="text-2xl font-bold text-youtube mb-4">
-								{t("results.youtube.matches")}
-							</h3>
-
-							<YouTubeMusicMatchList
-								matches={youtubeMatches}
-								onOpenURL={onOpenURL}
-								onCopyToClipboard={onCopyToClipboard}
-							/>
-						</>
-					)}
-					{sourcePlatform === "youtubeMusic" && hasTrack && (
-						<>
-							<h3 className="text-2xl font-bold text-primary mb-4">
-								{t("platform.spotify")} Matches
-							</h3>
-							<SpotifyMatchList
-								matches={spotifyMatches}
-								onOpenURL={onOpenURL}
-								onCopyToClipboard={onCopyToClipboard}
-								showAsExploreMore={
-									!spotifyMatches.some((m) => m.isHighQuality !== false)
-								}
-							/>
-						</>
-					)}
-					{sourcePlatform === "youtubeMusic" &&
-						hasAlbum &&
-						spotifyAlbumMatches &&
-						spotifyAlbumMatches.length > 0 && (
-							<>
-								<h3 className="text-2xl font-bold text-primary mb-4">
-									{t("platform.spotify")} Album Matches
-								</h3>
-								<div className="flex flex-col gap-2">
-									<p className="text-gray-600 text-sm font-semibold uppercase tracking-wider px-2 mb-2">
-										{spotifyAlbumMatches.length === 1
-											? t("results.topMatch")
-											: t("results.otherMatches")}
-									</p>
-									{spotifyAlbumMatches.map((album, index) => (
-										<button
-											key={album.id}
-											type="button"
-											onClick={() => onOpenURL(album.external_urls.spotify)}
-											className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${
-												index === 0
+						{hasAlbum &&
+							spotifyAlbumMatches &&
+							spotifyAlbumMatches.length > 0 && (
+								<>
+									<h3 className="text-2xl font-bold text-primary mb-4">
+										{t("platform.spotify")} Album Matches
+									</h3>
+									<div className="flex flex-col gap-2">
+										<p className="text-gray-600 text-sm font-semibold uppercase tracking-wider px-2 mb-2">
+											{spotifyAlbumMatches.length === 1
+												? t("results.topMatch")
+												: t("results.otherMatches")}
+										</p>
+										{spotifyAlbumMatches.map((album, index) => (
+											<button
+												key={album.id}
+												type="button"
+												onClick={() => onOpenURL(album.external_urls.spotify)}
+												className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${index === 0
 													? "bg-green-50 border-2 border-primary"
 													: "bg-white shadow"
-											}`}
-										>
-											<div className="flex items-center gap-3 flex-1 min-w-0">
-												{album.images?.[0]?.url && (
-													<img
-														src={album.images[0].url}
-														alt={album.name}
-														className="w-10 h-10 rounded flex-shrink-0"
-													/>
-												)}
-												<div className="flex flex-col justify-center flex-1 min-w-0">
-													<p className="text-sm font-medium text-gray-900 truncate">
-														{album.name}
-													</p>
-													<p className="text-gray-600 text-xs truncate">
-														{album.artists.join(", ")}
-													</p>
+													}`}
+											>
+												<div className="flex items-center gap-3 flex-1 min-w-0">
+													{album.images?.[0]?.url && (
+														<img
+															src={album.images[0].url}
+															alt={album.name}
+															className="w-10 h-10 rounded flex-shrink-0"
+														/>
+													)}
+													<div className="flex flex-col justify-center flex-1 min-w-0">
+														<p className="text-sm font-medium text-gray-900 truncate">
+															{album.name}
+														</p>
+														<p className="text-gray-600 text-xs truncate">
+															{album.artists.join(", ")}
+														</p>
+													</div>
 												</div>
-											</div>
-											<div className="flex items-center gap-2 flex-shrink-0">
-												<div
-													onClick={(e) => {
-														e.stopPropagation();
-														onCopyToClipboard(album.external_urls.spotify);
-													}}
-													className="hover:scale-110 transition-transform cursor-pointer"
-													role="button"
-													tabIndex={0}
-													onKeyDown={(e) => {
-														if (e.key === "Enter" || e.key === " ") {
-															e.preventDefault();
+												<div className="flex items-center gap-2 flex-shrink-0">
+													<div
+														onClick={(e) => {
 															e.stopPropagation();
-															// Call onCopyToClipboard directly without event
 															onCopyToClipboard(album.external_urls.spotify);
-														}
-													}}
-												>
-													<span className="text-primary text-xl">📋</span>
+														}}
+														className="hover:scale-110 transition-transform cursor-pointer"
+														role="button"
+														tabIndex={0}
+														onKeyDown={(e) => {
+															if (e.key === "Enter" || e.key === " ") {
+																e.preventDefault();
+																e.stopPropagation();
+																onCopyToClipboard(
+																	album.external_urls.spotify,
+																);
+															}
+														}}
+													>
+														<span className="text-primary text-xl">📋</span>
+													</div>
+													<span className="text-primary text-xl">✓</span>
 												</div>
-												<span className="text-primary text-xl">✓</span>
-											</div>
-										</button>
-									))}
-								</div>
-							</>
-						)}
-					{sourcePlatform === "youtubeMusic" &&
-						hasAlbum &&
-						spotifyMatches.length > 0 && (
+											</button>
+										))}
+									</div>
+								</>
+							)}
+						{hasAlbum && spotifyMatches.length > 0 && (
 							<>
 								<h3 className="text-2xl font-bold text-primary mb-4">
 									{t("platform.spotify")} Track Matches
@@ -344,39 +231,126 @@ export const ConversionResults = ({
 								/>
 							</>
 						)}
-				</div>
+					</div>
+				)}
 
-				{/* Second Target Platform */}
-				<div>
-					{sourcePlatform === "spotify" && (
-						<>
-							<h3 className="text-2xl font-bold text-youtube mb-4">
-								{t("platform.youtube")} Matches
-							</h3>
-							<YouTubeMusicMatchList
-								matches={youtubeMatches}
-								onOpenURL={onOpenURL}
-								onCopyToClipboard={onCopyToClipboard}
-							/>
-						</>
-					)}
-					{sourcePlatform === "youtubeMusic" && (
-						<>
-							<h3 className="text-2xl font-bold text-secondary mb-4">
-								{t("platform.deezer")} Matches
-							</h3>
+				{sourcePlatform !== "deezer" && (
+					<div>
+						{/* Deezer Matches */}
+						{hasTrack && (
+							<>
+								<h3 className="text-2xl font-bold text-secondary mb-4">
+									{t("platform.deezer")} Matches
+								</h3>
+								<DeezerMatchList
+									matches={deezerMatches}
+									onOpenURL={onOpenURL}
+									onCopyToClipboard={onCopyToClipboard}
+									showAsExploreMore={
+										!deezerMatches.some((m) => m.isHighQuality !== false)
+									}
+								/>
+							</>
+						)}
+						{hasAlbum &&
+							deezerAlbumMatches &&
+							deezerAlbumMatches.length > 0 && (
+								<>
+									<h3 className="text-2xl font-bold text-secondary mb-4">
+										{t("platform.deezer")} Album Matches
+									</h3>
+									<div className="flex flex-col gap-2">
+										<p className="text-gray-600 text-sm font-semibold uppercase tracking-wider px-2 mb-2">
+											{deezerAlbumMatches.length === 1
+												? t("results.topMatch")
+												: t("results.otherMatches")}
+										</p>
+										{deezerAlbumMatches.map((album, index) => (
+											<button
+												key={album.id}
+												type="button"
+												onClick={() => onOpenURL(album.link)}
+												className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${index === 0
+													? "bg-green-50 border-2 border-secondary"
+													: "bg-white shadow"
+													}`}
+											>
+												<div className="flex items-center gap-3 flex-1 min-w-0">
+													{album.cover && (
+														<img
+															src={album.cover}
+															alt={album.title}
+															className="w-10 h-10 rounded flex-shrink-0"
+														/>
+													)}
+													<div className="flex flex-col justify-center flex-1 min-w-0">
+														<p className="text-sm font-medium text-gray-900 truncate">
+															{album.title}
+														</p>
+														<p className="text-gray-600 text-xs truncate">
+															{album.artist}
+														</p>
+													</div>
+												</div>
+												<div className="flex items-center gap-2 flex-shrink-0">
+													<div
+														onClick={(e) => {
+															e.stopPropagation();
+															onCopyToClipboard(album.link);
+														}}
+														className="hover:scale-110 transition-transform cursor-pointer"
+														role="button"
+														tabIndex={0}
+														onKeyDown={(e) => {
+															if (e.key === "Enter" || e.key === " ") {
+																e.preventDefault();
+																e.stopPropagation();
+																onCopyToClipboard(album.link);
+															}
+														}}
+													>
+														<span className="text-secondary text-xl">
+															📋
+														</span>
+													</div>
+													<span className="text-secondary text-xl">✓</span>
+												</div>
+											</button>
+										))}
+									</div>
+								</>
+							)}
+						{hasAlbum && deezerMatches.length > 0 && (
+							<>
+								<h3 className="text-2xl font-bold text-secondary mb-4">
+									{t("platform.deezer")} Track Matches
+								</h3>
+								<DeezerMatchList
+									matches={deezerMatches}
+									onOpenURL={onOpenURL}
+									onCopyToClipboard={onCopyToClipboard}
+									showAsExploreMore={
+										!deezerMatches.some((m) => m.isHighQuality !== false)
+									}
+								/>
+							</>
+						)}
+					</div>
+				)}
 
-							<DeezerMatchList
-								matches={deezerMatches}
-								onOpenURL={onOpenURL}
-								onCopyToClipboard={onCopyToClipboard}
-								showAsExploreMore={
-									!deezerMatches.some((m) => m.isHighQuality !== false)
-								}
-							/>
-						</>
-					)}
-				</div>
+				{sourcePlatform !== "youtubeMusic" && (
+					<div>
+						{/* YouTube Music Matches */}
+						<h3 className="text-2xl font-bold text-youtube mb-4">
+							{t("platform.youtube")} Matches
+						</h3>
+						<YouTubeMusicMatchList
+							matches={youtubeMatches}
+							onOpenURL={onOpenURL}
+							onCopyToClipboard={onCopyToClipboard}
+						/>
+					</div>
+				)}
 			</div>
 
 			{/* Action Buttons */}

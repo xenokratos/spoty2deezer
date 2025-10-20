@@ -42,13 +42,12 @@ export const DeezerMatchList = ({
 					key={match.id}
 					type="button"
 					onClick={handleMatchClick(match.link)}
-					className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${
-						showAsExploreMore
+					className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${showAsExploreMore
 							? "bg-yellow-50 border-2 border-yellow-300"
 							: index === 0
 								? "bg-green-50 border-2 border-secondary"
 								: "bg-white shadow"
-					}`}
+						}`}
 				>
 					<div className="flex items-center gap-3 flex-1 min-w-0">
 						{match.cover && (

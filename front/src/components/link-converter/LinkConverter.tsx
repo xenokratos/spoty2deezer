@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDeezerToSpotify } from "../../hooks/useDeezerToSpotify";
 import { useDeezerToYouTubeMusic } from "../../hooks/useDeezerToYouTubeMusic";
 import { useSpotifyToDeezer } from "../../hooks/useSpotifyToDeezer";
 import { useSpotifyToYouTubeMusic } from "../../hooks/useSpotifyToYouTubeMusic";
@@ -36,6 +37,7 @@ export const LinkConverter = () => {
 	const { convert: convertSpotifyToDeezer } = useSpotifyToDeezer();
 	const { convert: convertSpotifyToYouTubeMusic } = useSpotifyToYouTubeMusic();
 	const { convert: convertDeezerToYouTubeMusic } = useDeezerToYouTubeMusic();
+	const { convert: convertDeezerToSpotify } = useDeezerToSpotify();
 	const { convert: convertYouTubeMusicToDeezer } = useYouTubeMusicToDeezer();
 	const { convert: convertYouTubeMusicToSpotify } = useYouTubeMusicToSpotify();
 
@@ -101,14 +103,17 @@ export const LinkConverter = () => {
 	};
 
 	const handleDeezerConversion = (url: string): void => {
-		convertDeezerToYouTubeMusic(url)
-			.then((youtubeResult) => {
+		Promise.all([
+			convertDeezerToYouTubeMusic(url),
+			convertDeezerToSpotify(url),
+		])
+			.then(([youtubeResult, spotifyResult]) => {
 				setResult({
 					sourceTrack: youtubeResult.deezerTrack,
 					sourcePlatform: "deezer",
 					deezerMatches: [], // No need to show Deezer matches for Deezer source
 					youtubeMatches: youtubeResult.youtubeMatches,
-					spotifyMatches: [],
+					spotifyMatches: spotifyResult.spotifyMatches,
 					spotifyAlbumMatches: [],
 				});
 				setLoading(false);

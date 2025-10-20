@@ -38,13 +38,12 @@ export const SpotifyMatchList = ({
 					key={track.id}
 					type="button"
 					onClick={() => onOpenURL(track.external_urls.spotify)}
-					className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${
-						showAsExploreMore
+					className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${showAsExploreMore
 							? "bg-yellow-50 border-2 border-yellow-300"
 							: index === 0
 								? "bg-green-50 border-2 border-primary"
 								: "bg-white shadow"
-					}`}
+						}`}
 				>
 					<div className="flex items-center gap-3 flex-1 min-w-0">
 						{track.images?.[0]?.url && (

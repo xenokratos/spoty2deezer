@@ -58,8 +58,8 @@ Visit `http://localhost:5173/spoty2deezer/` to use the application!
 
 ## 📋 Usage
 
-1. **Paste a Spotify URL** - Enter any Spotify track URL
-2. **Get matches** - The app finds the best Deezer/YouTube Music equivalents
+1. **Paste a music URL** - Enter any Spotify, Deezer, or YouTube Music track URL
+2. **Get matches** - The app finds the best equivalents across all supported platforms
 3. **Choose your platform** - Click to copy links or open directly
 4. **Enjoy your music** - Stream on your preferred platform
 
@@ -68,7 +68,9 @@ Visit `http://localhost:5173/spoty2deezer/` to use the application!
 - `https://open.spotify.com/track/{track-id}`
 - `spotify:track:{track-id}`
 - `https://music.youtube.com/watch?v={video-id}`
+- `https://www.youtube.com/watch?v={video-id}`
 - `https://deezer.com/track/{track-id}`
+- `https://www.deezer.com/track/{track-id}`
 
 ## ⚙️ Environment Configuration
 
@@ -81,7 +83,7 @@ Create a `.env` file in the `/back` directory:
 PORT=3001
 
 # Security Configuration
-ALLOWED_DOMAINS=open.spotify.com,api.spotify.com,oembed.spotify.com,api.deezer.com,link.deezer.com,www.deezer.com
+ALLOWED_DOMAINS=open.spotify.com,api.spotify.com,oembed.spotify.com,api.deezer.com,link.deezer.com,www.deezer.com,www.youtube.com,music.youtube.com,youtube.com
 
 # Request Configuration
 REQUEST_TIMEOUT=15000
