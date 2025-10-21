@@ -1,8 +1,8 @@
-import spotifyService from "../services/spotifyService";
-import youtubeMusicService from "../services/youtubeMusicService";
-import type { SpotifyTrack } from "../types/spotify.types";
-import type { YouTubeMusicTrack } from "../types/youtubeMusic.types";
-import { parseYouTubeMusicUrl } from "../utils/urlParser";
+import spotifyService from '../services/spotifyService';
+import youtubeMusicService from '../services/youtubeMusicService';
+import type { SpotifyTrack } from '../types/spotify.types';
+import type { YouTubeMusicTrack } from '../types/youtubeMusic.types';
+import { parseYouTubeMusicUrl } from '../utils/urlParser';
 
 /**
  * Result interface for YouTube Music to Spotify conversions
@@ -45,14 +45,14 @@ export const useYouTubeMusicToSpotify = () => {
 			// Return a generic track that will show as "no results found"
 			return Promise.resolve({
 				youtubeMusicTrack: {
-					id: "invalid",
-					name: "Invalid URL",
-					artists: ["Unknown"],
-					channel: "Unknown",
-					url: "",
-					thumbnail: "",
+					id: 'invalid',
+					name: 'Invalid URL',
+					artists: ['Unknown'],
+					channel: 'Unknown',
+					url: '',
+					thumbnail: '',
 					images: [],
-					external_urls: { youtube: "" },
+					external_urls: { youtube: '' },
 				},
 				spotifyMatches: [],
 			});

@@ -1,6 +1,6 @@
-import type { SpotifyAlbum } from "../types/spotify.types";
-import type { YouTubeMusicTrack } from "../types/youtubeMusic.types";
-import { fetchWithProxy } from "../utils/responseWrapper";
+import type { SpotifyAlbum } from '../types/spotify.types';
+import type { YouTubeMusicTrack } from '../types/youtubeMusic.types';
+import { fetchWithProxy } from '../utils/responseWrapper';
 
 interface YouTubeOEmbedResponse {
 	title: string;
@@ -31,14 +31,14 @@ class YouTubeMusicService {
 	 * @returns Normalized string
 	 */
 	private normalizeForSearch(str: string): string {
-		if (!str || typeof str !== "string") {
-			return "";
+		if (!str || typeof str !== 'string') {
+			return '';
 		}
 
 		return str
-			.replace(/\s*\(feat\..*?\)/gi, "") // Remove feat. annotations
-			.replace(/\s*\[.*?\]\s*/g, "") // Remove content in brackets
-			.replace(/\s*\(.*?\)\s*/g, "") // Remove content in parentheses
+			.replace(/\s*\(feat\..*?\)/gi, '') // Remove feat. annotations
+			.replace(/\s*\[.*?\]\s*/g, '') // Remove content in brackets
+			.replace(/\s*\(.*?\)\s*/g, '') // Remove content in parentheses
 			.trim();
 	}
 
@@ -62,8 +62,8 @@ class YouTubeMusicService {
 			);
 
 			// Parse title and artist from the oEmbed response
-			const title = oembedData.title || "Unknown Track";
-			const author = oembedData.author_name || "Unknown Artist";
+			const title = oembedData.title || 'Unknown Track';
+			const author = oembedData.author_name || 'Unknown Artist';
 
 			return {
 				id: videoId,
@@ -80,14 +80,14 @@ class YouTubeMusicService {
 		} catch (error) {
 			// Fallback to generic track if oEmbed fails
 			console.warn(
-				"Failed to fetch YouTube track info, using generic data:",
+				'Failed to fetch YouTube track info, using generic data:',
 				error,
 			);
 			return {
 				id: videoId,
-				name: "Track from YouTube Music",
-				artists: ["Unknown Artist"],
-				channel: "Unknown Channel",
+				name: 'Track from YouTube Music',
+				artists: ['Unknown Artist'],
+				channel: 'Unknown Channel',
 				url: `https://music.youtube.com/watch?v=${videoId}`,
 				thumbnail: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
 				images: [
@@ -110,9 +110,9 @@ class YouTubeMusicService {
 		images?: Array<{ url: string }>;
 	}): Promise<YouTubeMusicTrack[]> {
 		const { name, artists, images } = spotifyTrack;
-		const artist = artists[0] || "";
+		const artist = artists[0] || '';
 		const thumbnail =
-			images?.[0]?.url || "https://i.ytimg.com/vi/default/mqdefault.jpg";
+			images?.[0]?.url || 'https://i.ytimg.com/vi/default/mqdefault.jpg';
 
 		// Normalize track name and artist for better search results
 		const cleanTrackName = this.normalizeForSearch(name);
@@ -180,8 +180,8 @@ class YouTubeMusicService {
 			results.push({
 				id: `search-${Date.now()}-fallback`,
 				name: cleanTrackName,
-				artists: ["Unknown"],
-				channel: "Various Artists",
+				artists: ['Unknown'],
+				channel: 'Various Artists',
 				url: `https://music.youtube.com/search?q=${fallbackQuery}`,
 				thumbnail,
 				images: [{ url: thumbnail }],
@@ -226,9 +226,9 @@ class YouTubeMusicService {
 	 */
 	findAlbumMatches(sourceAlbum: SpotifyAlbum): Promise<YouTubeMusicTrack[]> {
 		const { name, artists, images } = sourceAlbum;
-		const artist = artists[0] || "";
+		const artist = artists[0] || '';
 		const thumbnail =
-			images?.[0]?.url || "https://i.ytimg.com/vi/default/mqdefault.jpg";
+			images?.[0]?.url || 'https://i.ytimg.com/vi/default/mqdefault.jpg';
 
 		// Normalize album name and artist for better search results
 		const cleanAlbumName = this.normalizeForSearch(name);
@@ -278,8 +278,8 @@ class YouTubeMusicService {
 			results.push({
 				id: `album-search-${Date.now()}-fallback`,
 				name: cleanAlbumName,
-				artists: ["Various Artists"],
-				channel: "Various Artists",
+				artists: ['Various Artists'],
+				channel: 'Various Artists',
 				url: `https://music.youtube.com/search?q=${fallbackQuery}`,
 				thumbnail,
 				images: [{ url: thumbnail }],

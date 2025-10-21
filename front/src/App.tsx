@@ -1,4 +1,4 @@
-import { LinkConverter } from "./components/link-converter";
+import { LinkConverter } from './components/link-converter';
 
 function App() {
 	return <LinkConverter />;

@@ -1,8 +1,8 @@
-import deezerService from "../services/deezerService";
-import youtubeMusicService from "../services/youtubeMusicService";
-import type { DeezerTrack } from "../types/deezer.types";
-import type { YouTubeMusicTrack } from "../types/youtubeMusic.types";
-import { parseYouTubeMusicUrl } from "../utils/urlParser";
+import deezerService from '../services/deezerService';
+import youtubeMusicService from '../services/youtubeMusicService';
+import type { DeezerTrack } from '../types/deezer.types';
+import type { YouTubeMusicTrack } from '../types/youtubeMusic.types';
+import { parseYouTubeMusicUrl } from '../utils/urlParser';
 
 /**
  * Result interface for YouTube Music to Deezer conversions
@@ -45,14 +45,14 @@ export const useYouTubeMusicToDeezer = () => {
 			// Return a generic track that will show as "no results found"
 			return Promise.resolve({
 				youtubeMusicTrack: {
-					id: "invalid",
-					name: "Invalid URL",
-					artists: ["Unknown"],
-					channel: "Unknown",
-					url: "",
-					thumbnail: "",
+					id: 'invalid',
+					name: 'Invalid URL',
+					artists: ['Unknown'],
+					channel: 'Unknown',
+					url: '',
+					thumbnail: '',
 					images: [],
-					external_urls: { youtube: "" },
+					external_urls: { youtube: '' },
 				},
 				deezerMatches: [],
 			});

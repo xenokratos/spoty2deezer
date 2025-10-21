@@ -1,1 +1,1 @@
-export { LinkConverter, LinkConverter as default } from "./LinkConverter";
+export { LinkConverter, LinkConverter as default } from './LinkConverter';

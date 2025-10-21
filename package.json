@@ -10,9 +10,9 @@
 		"install:all": "npm install && cd front && npm install && cd ../back && npm install",
 		"clean": "rm -rf node_modules front/node_modules back/node_modules front/dist",
 		"clean:dist": "rm -rf front/dist back/dist",
-		"lint": "pnpm clean:dist && biome check",
-		"lint:fix": "pnpm clean:dist && biome check --write .",
-		"format": "pnpm clean:dist && biome format --write ."
+		"lint": "biome check --config-path biome.json .",
+		"lint:fix": "biome check --config-path biome.json --write .",
+		"format": "biome format --config-path biome.json --write ."
 	},
 	"devDependencies": {
 		"concurrently": "^8.2.0",

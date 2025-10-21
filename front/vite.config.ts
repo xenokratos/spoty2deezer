@@ -1,5 +1,5 @@
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
 	plugins: [react()],
@@ -8,14 +8,14 @@ export default defineConfig({
 		host: true,
 		proxy: {
 			// Dev-only: front → backend proxy
-			"/proxy": {
-				target: "http://localhost:3001",
+			'/proxy': {
+				target: 'http://localhost:3001',
 				changeOrigin: true,
 				secure: false,
 			},
 		},
 	},
-	base: "/spoty2deezer/",
+	base: '/spoty2deezer/',
 	build: {
 		chunkSizeWarningLimit: 1000,
 	},

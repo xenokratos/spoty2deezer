@@ -1,5 +1,5 @@
-import { useTranslation } from "react-i18next";
-import type { SpotifyTrack } from "../../types/spotify.types";
+import { useTranslation } from 'react-i18next';
+import type { SpotifyTrack } from '../../types/spotify.types';
 
 interface SpotifyMatchListProps {
 	matches: SpotifyTrack[];
@@ -19,7 +19,7 @@ export const SpotifyMatchList = ({
 	if (!matches || matches.length === 0) {
 		return (
 			<p className="text-gray-600 text-base italic">
-				{t("results.noMatches", { platform: t("platform.spotify") })}
+				{t('results.noMatches', { platform: t('platform.spotify') })}
 			</p>
 		);
 	}
@@ -28,22 +28,23 @@ export const SpotifyMatchList = ({
 		<div className="flex flex-col gap-2">
 			<p className="text-gray-600 text-sm font-semibold uppercase tracking-wider px-2 mb-2">
 				{showAsExploreMore
-					? t("results.exploreMore")
+					? t('results.exploreMore')
 					: matches.length === 1
-						? t("results.topMatch")
-						: t("results.otherMatches")}
+						? t('results.topMatch')
+						: t('results.otherMatches')}
 			</p>
 			{matches.map((track, index) => (
 				<button
 					key={track.id}
 					type="button"
 					onClick={() => onOpenURL(track.external_urls.spotify)}
-					className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${showAsExploreMore
-							? "bg-yellow-50 border-2 border-yellow-300"
+					className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${
+						showAsExploreMore
+							? 'bg-yellow-50 border-2 border-yellow-300'
 							: index === 0
-								? "bg-green-50 border-2 border-primary"
-								: "bg-white shadow"
-						}`}
+								? 'bg-green-50 border-2 border-primary'
+								: 'bg-white shadow'
+					}`}
 				>
 					<div className="flex items-center gap-3 flex-1 min-w-0">
 						{track.images?.[0]?.url && (
@@ -58,7 +59,7 @@ export const SpotifyMatchList = ({
 								{track.name}
 							</p>
 							<p className="text-gray-600 text-xs truncate">
-								{track.artists.join(", ")}
+								{track.artists.join(', ')}
 							</p>
 						</div>
 					</div>
@@ -72,7 +73,7 @@ export const SpotifyMatchList = ({
 							role="button"
 							tabIndex={0}
 							onKeyDown={(e) => {
-								if (e.key === "Enter" || e.key === " ") {
+								if (e.key === 'Enter' || e.key === ' ') {
 									e.preventDefault();
 									e.stopPropagation();
 									onCopyToClipboard(track.external_urls.spotify);
@@ -80,13 +81,13 @@ export const SpotifyMatchList = ({
 							}}
 						>
 							<span
-								className={`${showAsExploreMore ? "text-yellow-600" : "text-primary"} text-xl`}
+								className={`${showAsExploreMore ? 'text-yellow-600' : 'text-primary'} text-xl`}
 							>
 								📋
 							</span>
 						</div>
 						<span
-							className={`${showAsExploreMore ? "text-yellow-600" : "text-primary"} text-xl`}
+							className={`${showAsExploreMore ? 'text-yellow-600' : 'text-primary'} text-xl`}
 						>
 							✓
 						</span>

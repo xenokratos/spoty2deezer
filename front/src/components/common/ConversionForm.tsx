@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
 interface ConversionFormProps {
 	value: string;
@@ -30,7 +30,7 @@ export const ConversionForm = ({
 					type="text"
 					value={value}
 					onChange={handleInputChange}
-					placeholder={t("form.placeholder")}
+					placeholder={t('form.placeholder')}
 					className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md py-3 pl-12 pr-4 text-base focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
 				/>
 			</div>
@@ -43,7 +43,7 @@ export const ConversionForm = ({
 			>
 				<span className="text-2xl">🔄</span>
 				<span>
-					{loading ? t("form.convertButton.loading") : t("form.convertButton")}
+					{loading ? t('form.convertButton.loading') : t('form.convertButton')}
 				</span>
 			</button>
 

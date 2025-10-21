@@ -85,5 +85,5 @@ export type DeezerApiResponse = DeezerSearchResponse | DeezerApiError;
 export function isDeezerApiError(
 	response: DeezerApiResponse,
 ): response is DeezerApiError {
-	return "error" in response;
+	return 'error' in response;
 }

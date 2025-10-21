@@ -3,7 +3,7 @@
  * Supports various URL formats for both platforms
  */
 
-export type PlatformType = "spotify" | "deezer" | "youtubeMusic" | null;
+export type PlatformType = 'spotify' | 'deezer' | 'youtubeMusic' | null;
 
 /**
  * Extracts the track ID from a Spotify URL or URI
@@ -178,28 +178,28 @@ export function detectPlatform(url: string | null | undefined): PlatformType {
 	const trimmedUrl = url.trim();
 
 	// Check Spotify
-	if (trimmedUrl.includes("spotify.com") || trimmedUrl.startsWith("spotify:")) {
+	if (trimmedUrl.includes('spotify.com') || trimmedUrl.startsWith('spotify:')) {
 		return parseSpotifyUrl(trimmedUrl) || parseSpotifyAlbumUrl(trimmedUrl)
-			? "spotify"
+			? 'spotify'
 			: null;
 	}
 
 	// Check Deezer
 	if (
-		trimmedUrl.includes("deezer.com") ||
-		trimmedUrl.includes("link.deezer.com")
+		trimmedUrl.includes('deezer.com') ||
+		trimmedUrl.includes('link.deezer.com')
 	) {
-		return parseDeezerUrl(trimmedUrl) ? "deezer" : null;
+		return parseDeezerUrl(trimmedUrl) ? 'deezer' : null;
 	}
 
 	// Check YouTube Music
 	if (
-		trimmedUrl.includes("youtube.com") ||
-		trimmedUrl.includes("music.youtube.com")
+		trimmedUrl.includes('youtube.com') ||
+		trimmedUrl.includes('music.youtube.com')
 	) {
 		return parseYouTubeMusicUrl(trimmedUrl) ||
 			parseYouTubeMusicAlbumUrl(trimmedUrl)
-			? "youtubeMusic"
+			? 'youtubeMusic'
 			: null;
 	}
 

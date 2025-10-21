@@ -1,8 +1,8 @@
-import deezerService from "../services/deezerService";
-import spotifyService from "../services/spotifyService";
-import type { DeezerAlbum, DeezerTrack } from "../types/deezer.types";
-import type { SpotifyAlbum, SpotifyTrack } from "../types/spotify.types";
-import { parseSpotifyAlbumUrl, parseSpotifyUrl } from "../utils/urlParser";
+import deezerService from '../services/deezerService';
+import spotifyService from '../services/spotifyService';
+import type { DeezerAlbum, DeezerTrack } from '../types/deezer.types';
+import type { SpotifyAlbum, SpotifyTrack } from '../types/spotify.types';
+import { parseSpotifyAlbumUrl, parseSpotifyUrl } from '../utils/urlParser';
 
 /**
  * Result interface for Spotify to Deezer conversions
@@ -44,7 +44,7 @@ export const useSpotifyToDeezer = () => {
 						if (deezerMatches.length === 0) {
 							return Promise.reject(
 								new Error(
-									"No matching tracks found on Deezer. Try adjusting the search terms or check if the track exists on Deezer.",
+									'No matching tracks found on Deezer. Try adjusting the search terms or check if the track exists on Deezer.',
 								),
 							);
 						}
@@ -96,7 +96,7 @@ export const useSpotifyToDeezer = () => {
 		} else {
 			return Promise.reject(
 				new Error(
-					"Invalid Spotify URL. Please check the format and try again.",
+					'Invalid Spotify URL. Please check the format and try again.',
 				),
 			);
 		}

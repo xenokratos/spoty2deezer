@@ -39,10 +39,12 @@ export const useDeezerToSpotify = () => {
 					images: deezerTrack.cover ? [{ url: deezerTrack.cover }] : undefined,
 				};
 
-				return spotifyService.findTrackMatches(transformedTrack).then((spotifyMatches) => {
-					// Always return results, even if they're search URLs
-					return { deezerTrack, spotifyMatches };
-				});
+				return spotifyService
+					.findTrackMatches(transformedTrack)
+					.then((spotifyMatches) => {
+						// Always return results, even if they're search URLs
+						return { deezerTrack, spotifyMatches };
+					});
 			});
 		} else {
 			// Return a generic track that will show as "no results found"

@@ -1,5 +1,5 @@
-import { useTranslation } from "react-i18next";
-import type { YouTubeMusicTrack } from "../../types/youtubeMusic.types";
+import { useTranslation } from 'react-i18next';
+import type { YouTubeMusicTrack } from '../../types/youtubeMusic.types';
 
 interface YouTubeMusicMatchListProps {
 	matches: YouTubeMusicTrack[];
@@ -30,8 +30,8 @@ export const YouTubeMusicMatchList = ({
 		<div className="flex flex-col gap-2">
 			<p className="text-gray-600 text-sm font-semibold uppercase tracking-wider px-2 mb-2">
 				{matches.length === 1
-					? t("results.topMatch")
-					: t("results.otherMatches")}
+					? t('results.topMatch')
+					: t('results.otherMatches')}
 			</p>
 			{matches.map((match, index) => (
 				<button
@@ -40,8 +40,8 @@ export const YouTubeMusicMatchList = ({
 					onClick={handleMatchClick(match.url)}
 					className={`flex items-center gap-4 px-4 py-3 justify-between rounded-lg transition-opacity hover:opacity-70 ${
 						index === 0
-							? "bg-red-50 border-2 border-youtube"
-							: "bg-white shadow"
+							? 'bg-red-50 border-2 border-youtube'
+							: 'bg-white shadow'
 					}`}
 				>
 					<div className="flex items-center gap-3 flex-1 min-w-0">
@@ -66,7 +66,7 @@ export const YouTubeMusicMatchList = ({
 							role="button"
 							tabIndex={0}
 							onKeyDown={(e) => {
-								if (e.key === "Enter" || e.key === " ") {
+								if (e.key === 'Enter' || e.key === ' ') {
 									e.preventDefault();
 									handleCopyClick(match.url)(e as any);
 								}

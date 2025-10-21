@@ -1,10 +1,10 @@
-import type { AxiosError } from "axios";
+import type { AxiosError } from 'axios';
 import type {
 	SpotifyAlbum,
 	SpotifyOEmbedResponse,
 	SpotifyTrack,
-} from "../types/spotify.types";
-import { fetchWithProxy } from "../utils/responseWrapper";
+} from '../types/spotify.types';
+import { fetchWithProxy } from '../utils/responseWrapper';
 
 /**
  * Service for interacting with Spotify API
@@ -34,9 +34,9 @@ class SpotifyService {
 			// Base object from oEmbed
 			const trackInfo: SpotifyTrack = {
 				id: trackId,
-				name: oembedData.title ?? "",
+				name: oembedData.title ?? '',
 				artists: [],
-				album: "",
+				album: '',
 				external_urls: { spotify: trackUrl },
 				images: oembedData.thumbnail_url
 					? [{ url: oembedData.thumbnail_url }]
@@ -55,7 +55,7 @@ class SpotifyService {
 					const [maybeTitle, ...rest] = parts;
 					if (maybeTitle) {
 						trackInfo.name = maybeTitle.trim();
-						trackInfo.artists = [rest.join(" - ").trim()];
+						trackInfo.artists = [rest.join(' - ').trim()];
 					}
 				} else if (parts.length === 1) {
 					if (parts[0]) {
@@ -67,7 +67,7 @@ class SpotifyService {
 			// Ensure we have at least a name or an artist; otherwise treat as failure
 			if (!trackInfo.name && trackInfo.artists.length === 0) {
 				throw new Error(
-					"Unable to extract track information from Spotify. Please check the URL and try again.",
+					'Unable to extract track information from Spotify. Please check the URL and try again.',
 				);
 			}
 
@@ -76,25 +76,25 @@ class SpotifyService {
 			const axiosError = error as AxiosError;
 			if (axiosError.response?.status === 404) {
 				throw new Error(
-					"Track not found on Spotify. Please verify the URL is correct.",
+					'Track not found on Spotify. Please verify the URL is correct.',
 				);
 			}
 			if (
 				axiosError.response?.status === 403 ||
 				axiosError.response?.status === 401
 			) {
-				throw new Error("Unable to access Spotify. Please try again later.");
+				throw new Error('Unable to access Spotify. Please try again later.');
 			}
 			if (
-				axiosError.code === "ECONNABORTED" ||
-				axiosError.code === "ETIMEDOUT"
+				axiosError.code === 'ECONNABORTED' ||
+				axiosError.code === 'ETIMEDOUT'
 			) {
 				throw new Error(
-					"Connection timeout. Please check your internet connection and try again.",
+					'Connection timeout. Please check your internet connection and try again.',
 				);
 			}
 			const errorMessage =
-				error instanceof Error ? error.message : "Unknown error occurred";
+				error instanceof Error ? error.message : 'Unknown error occurred';
 			throw new Error(`Failed to fetch track from Spotify: ${errorMessage}`);
 		}
 	}
@@ -123,7 +123,7 @@ class SpotifyService {
 			// Base object from oEmbed
 			const albumInfo: SpotifyAlbum = {
 				id: albumId,
-				name: oembedData.title ?? "",
+				name: oembedData.title ?? '',
 				artists: [],
 				external_urls: { spotify: albumUrl },
 				images: oembedData.thumbnail_url
@@ -142,7 +142,7 @@ class SpotifyService {
 					const [maybeTitle, ...rest] = parts;
 					if (maybeTitle) {
 						albumInfo.name = maybeTitle.trim();
-						albumInfo.artists = [rest.join(" - ").trim()];
+						albumInfo.artists = [rest.join(' - ').trim()];
 					}
 				} else if (parts.length === 1) {
 					if (parts[0]) {
@@ -154,7 +154,7 @@ class SpotifyService {
 			// Ensure we have at least a name or an artist; otherwise treat as failure
 			if (!albumInfo.name && albumInfo.artists.length === 0) {
 				throw new Error(
-					"Unable to extract album information from Spotify. Please check the URL and try again.",
+					'Unable to extract album information from Spotify. Please check the URL and try again.',
 				);
 			}
 
@@ -163,25 +163,25 @@ class SpotifyService {
 			const axiosError = error as AxiosError;
 			if (axiosError.response?.status === 404) {
 				throw new Error(
-					"Album not found on Spotify. Please verify the URL is correct.",
+					'Album not found on Spotify. Please verify the URL is correct.',
 				);
 			}
 			if (
 				axiosError.response?.status === 403 ||
 				axiosError.response?.status === 401
 			) {
-				throw new Error("Unable to access Spotify. Please try again later.");
+				throw new Error('Unable to access Spotify. Please try again later.');
 			}
 			if (
-				axiosError.code === "ECONNABORTED" ||
-				axiosError.code === "ETIMEDOUT"
+				axiosError.code === 'ECONNABORTED' ||
+				axiosError.code === 'ETIMEDOUT'
 			) {
 				throw new Error(
-					"Connection timeout. Please check your internet connection and try again.",
+					'Connection timeout. Please check your internet connection and try again.',
 				);
 			}
 			const errorMessage =
-				error instanceof Error ? error.message : "Unknown error occurred";
+				error instanceof Error ? error.message : 'Unknown error occurred';
 			throw new Error(`Failed to fetch album from Spotify: ${errorMessage}`);
 		}
 	}
@@ -210,8 +210,8 @@ class SpotifyService {
 		images?: Array<{ url: string }>;
 	}): Promise<SpotifyTrack[]> {
 		const { name, artists } = sourceTrack;
-		const artist = artists[0] || "";
-		const thumbnail = sourceTrack.images?.[0]?.url || "";
+		const artist = artists[0] || '';
+		const thumbnail = sourceTrack.images?.[0]?.url || '';
 
 		const results: SpotifyTrack[] = [];
 
@@ -222,7 +222,7 @@ class SpotifyService {
 				id: `search-${Date.now()}-1`,
 				name: name,
 				artists: [artist],
-				album: "",
+				album: '',
 				external_urls: {
 					spotify: `https://open.spotify.com/search/${primaryQuery}`,
 				},
@@ -236,7 +236,7 @@ class SpotifyService {
 				id: `search-${Date.now()}-2`,
 				name: name,
 				artists: [artist],
-				album: "",
+				album: '',
 				external_urls: {
 					spotify: `https://open.spotify.com/search/${trackOnlyQuery}`,
 				},
@@ -249,8 +249,8 @@ class SpotifyService {
 			results.push({
 				id: `search-${Date.now()}-fallback`,
 				name: name,
-				artists: ["Unknown Artist"],
-				album: "",
+				artists: ['Unknown Artist'],
+				album: '',
 				external_urls: {
 					spotify: `https://open.spotify.com/search/${fallbackQuery}`,
 				},
@@ -270,8 +270,8 @@ class SpotifyService {
 	 */
 	async findAlbumMatches(sourceAlbum: any): Promise<SpotifyAlbum[]> {
 		const { name, artists } = sourceAlbum;
-		const artist = artists[0] || "";
-		const thumbnail = sourceAlbum.images?.[0]?.url || "";
+		const artist = artists[0] || '';
+		const thumbnail = sourceAlbum.images?.[0]?.url || '';
 
 		const results: SpotifyAlbum[] = [];
 
@@ -307,7 +307,7 @@ class SpotifyService {
 			results.push({
 				id: `album-search-${Date.now()}-fallback`,
 				name: name,
-				artists: ["Unknown Artist"],
+				artists: ['Unknown Artist'],
 				external_urls: {
 					spotify: `https://open.spotify.com/search/${fallbackQuery}`,
 				},

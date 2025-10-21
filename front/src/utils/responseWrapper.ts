@@ -1,4 +1,4 @@
-import axios, { type AxiosResponse } from "axios";
+import axios, { type AxiosResponse } from 'axios';
 
 /**
  * Makes a request with automatic proxy fallback and retry logic
@@ -44,7 +44,7 @@ export async function fetchWithProxy<T = any>(
 		}
 	}
 
-	throw new Error("Backend proxy failed after retries");
+	throw new Error('Backend proxy failed after retries');
 }
 
 /**
@@ -57,20 +57,20 @@ export function unwrapProxyResponse<T>(response: AxiosResponse): T {
 	const { data } = response;
 
 	// Handle development mode (direct response from our proxy)
-	if (import.meta.env.MODE === "development") {
-		return (typeof data === "string" ? JSON.parse(data) : data) as T;
+	if (import.meta.env.MODE === 'development') {
+		return (typeof data === 'string' ? JSON.parse(data) : data) as T;
 	}
 
-	const wrappedResponse = typeof data === "string" ? JSON.parse(data) : data;
+	const wrappedResponse = typeof data === 'string' ? JSON.parse(data) : data;
 
 	if (
 		wrappedResponse &&
-		typeof wrappedResponse === "object" &&
-		"contents" in wrappedResponse
+		typeof wrappedResponse === 'object' &&
+		'contents' in wrappedResponse
 	) {
 		const contents = wrappedResponse.contents;
 		return (
-			typeof contents === "string" ? JSON.parse(contents) : contents
+			typeof contents === 'string' ? JSON.parse(contents) : contents
 		) as T;
 	}
 
@@ -84,7 +84,7 @@ export function unwrapProxyResponse<T>(response: AxiosResponse): T {
  * @returns Proxied URL or direct URL depending on environment
  */
 export function createProxyUrl(url: string): string {
-	if (import.meta.env.MODE === "development") {
+	if (import.meta.env.MODE === 'development') {
 		return `/proxy?url=${encodeURIComponent(url)}`;
 	}
 
