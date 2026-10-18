@@ -368,6 +368,15 @@ export function RelayApp() {
 						<Icon name="help" />
 						{copy.help}
 					</button>
+					<a
+						className="text-button"
+						href="https://github.com/xenokratos/spoty2deezer"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						GitHub
+						<Icon name="external" />
+					</a>
 				</div>
 			</footer>
 			<output className="toast-region" aria-live="polite">
