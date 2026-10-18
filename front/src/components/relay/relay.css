@@ -169,13 +169,37 @@
 	text-decoration: underline;
 	text-underline-offset: 4px;
 }
+.language-picker {
+	position: relative;
+	display: inline-flex;
+	flex-shrink: 0;
+}
 .language-picker select {
-	padding: 6px 8px;
+	appearance: none;
+	-webkit-appearance: none;
+	width: 76px;
+	min-height: 44px;
+	padding: 10px 32px 10px 12px;
 	color: var(--ink);
 	background: var(--canvas);
 	border: 1px solid var(--control-line);
 	border-radius: 6px;
 	font-size: 12px;
+	line-height: 20px;
+	cursor: pointer;
+}
+.language-picker > .relay-icon {
+	position: absolute;
+	right: 12px;
+	top: 50%;
+	width: 16px;
+	height: 16px;
+	transform: translateY(-50%);
+	color: var(--muted);
+	pointer-events: none;
+}
+.language-picker select:hover {
+	border-color: var(--azure-dark);
 }
 .app-main {
 	width: 100%;
@@ -220,15 +244,14 @@
 .platform-icon {
 	display: inline-grid;
 	place-items: center;
-	background: var(--surface);
-	border: 1px solid var(--line);
-	border-radius: 50%;
 	width: 27px;
 	height: 27px;
 }
-.platform-icon .relay-icon {
-	width: 15px;
-	height: 15px;
+.platform-icon img {
+	display: block;
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
 }
 .converter-panel {
 	background: var(--surface);

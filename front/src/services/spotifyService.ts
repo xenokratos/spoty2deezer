@@ -5,11 +5,25 @@ import type {
 	SpotifyTrack,
 } from '../types/spotify.types';
 import { fetchWithProxy } from '../utils/responseWrapper';
+import { parseSpotifyEmbed } from './spotifyMetadata';
 
 /**
  * Service for interacting with Spotify API
  */
 class SpotifyService {
+	private async getEmbedMetadata(kind: 'track' | 'album', id: string) {
+		try {
+			const html = await fetchWithProxy<string>(
+				`https://open.spotify.com/embed/${kind}/${id}`,
+				{ timeout: 10000, maxRetries: 0 },
+			);
+			return parseSpotifyEmbed(html, kind, id) ?? {};
+		} catch {
+			// Keep the oEmbed title and artwork when richer metadata is unavailable.
+			return {};
+		}
+	}
+
 	/**
 	 * Get track information by track ID using oEmbed API
 	 * @param trackId - The Spotify track ID
@@ -43,26 +57,7 @@ class SpotifyService {
 					: [],
 			};
 
-			// Parse artist/title from oEmbed title.
-			// Common formats observed:
-			//  - "Song Title - Artist"
-			//  - "Song Title – Artist" (en dash)
-			//  - "Song Title — Artist" (em dash)
-			// If more than two parts (e.g., multiple artists), join the tail as artist.
-			if (oembedData.title) {
-				const parts = oembedData.title.split(/\s[-–—]\s/); // split on hyphen/en/em dash with spaces
-				if (parts.length >= 2) {
-					const [maybeTitle, ...rest] = parts;
-					if (maybeTitle) {
-						trackInfo.name = maybeTitle.trim();
-						trackInfo.artists = [rest.join(' - ').trim()];
-					}
-				} else if (parts.length === 1) {
-					if (parts[0]) {
-						trackInfo.name = parts[0].trim();
-					}
-				}
-			}
+			Object.assign(trackInfo, await this.getEmbedMetadata('track', trackId));
 
 			// Ensure we have at least a name or an artist; otherwise treat as failure
 			if (!trackInfo.name && trackInfo.artists.length === 0) {
@@ -131,25 +126,7 @@ class SpotifyService {
 					: [],
 			};
 
-			// Parse artist/album from oEmbed title.
-			// Common formats observed:
-			//  - "Album Title - Artist"
-			//  - "Album Title – Artist" (en dash)
-			//  - "Album Title — Artist" (em dash)
-			if (oembedData.title) {
-				const parts = oembedData.title.split(/\s[-–—]\s/); // split on hyphen/en/em dash with spaces
-				if (parts.length >= 2) {
-					const [maybeTitle, ...rest] = parts;
-					if (maybeTitle) {
-						albumInfo.name = maybeTitle.trim();
-						albumInfo.artists = [rest.join(' - ').trim()];
-					}
-				} else if (parts.length === 1) {
-					if (parts[0]) {
-						albumInfo.name = parts[0].trim();
-					}
-				}
-			}
+			Object.assign(albumInfo, await this.getEmbedMetadata('album', albumId));
 
 			// Ensure we have at least a name or an artist; otherwise treat as failure
 			if (!albumInfo.name && albumInfo.artists.length === 0) {

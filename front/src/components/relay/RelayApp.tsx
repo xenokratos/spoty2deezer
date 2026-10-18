@@ -276,6 +276,7 @@ export function RelayApp() {
 								<option value="en">EN</option>
 								<option value="fr">FR</option>
 							</select>
+							<Icon name="chevron" />
 						</label>
 					</nav>
 				</div>
@@ -382,7 +383,7 @@ export function RelayApp() {
 								className="text-button example-button"
 								onClick={() => {
 									setUrl(
-										'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh',
+										'https://open.spotify.com/track/1WvvmEowf7hiz5EnyAwtTj',
 									);
 									setError('');
 									inputRef.current?.focus();
@@ -476,7 +477,6 @@ export function RelayApp() {
 			</main>
 			<footer className="app-footer">
 				<div>
-					<p>{copy.foot}</p>
 					<button
 						className="text-button"
 						type="button"

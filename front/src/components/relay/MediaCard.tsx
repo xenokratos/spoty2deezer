@@ -1,8 +1,17 @@
 import { useState } from 'react';
+import deezerLogo from '../../assets/platforms/deezer.png';
+import spotifyLogo from '../../assets/platforms/spotify.svg';
+import youtubeMusicLogo from '../../assets/platforms/youtube-music.png';
 import type { PlatformType } from '../../types/converter.types';
 import { useCopy } from './copy';
 import { Icon } from './Icon';
 import { type Media, platformNames } from './presentation';
+
+const platformLogos: Record<PlatformType, string> = {
+	spotify: spotifyLogo,
+	deezer: deezerLogo,
+	youtubeMusic: youtubeMusicLogo,
+};
 
 export function Artwork({ media }: { media: Media }) {
 	const [failed, setFailed] = useState(false);
@@ -21,15 +30,7 @@ export function Platform({ platform }: { platform: PlatformType }) {
 	return (
 		<span className="platform">
 			<span className="platform-icon">
-				<Icon
-					name={
-						platform === 'spotify'
-							? 'headphones'
-							: platform === 'deezer'
-								? 'wave'
-								: 'play'
-					}
-				/>
+				<img src={platformLogos[platform]} alt="" width="24" height="24" />
 			</span>
 			{platformNames[platform]}
 		</span>
