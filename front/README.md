@@ -37,7 +37,7 @@ pnpm lint
 pnpm build
 ```
 
-The frontend checks parser/preview behavior and response validation. Backend tests cover conversion behavior through provider fixtures and loopback HTTP integration. Live provider checks and browser acceptance complement those deterministic tests. Credential-backed Spotify/YouTube branches are fixture-tested until credentials are configured.
+The frontend checks parser/preview behavior and response validation. Backend tests cover conversion behavior through provider fixtures and loopback HTTP integration. Live provider checks and browser acceptance complement those deterministic tests. The app uses public metadata and catalog lookups; no API keys or developer accounts are required.
 
 The following UI audit records the original Relay redesign. The resolver migration preserves its presentation while replacing its former browser-side conversion hooks.
 
@@ -69,4 +69,8 @@ and are excluded from Git and linting.
 
 The migrated build passed 50 automated checks (47 backend, three frontend), production compilation, and lint with one pre-existing `main.tsx` warning. Ten browser acceptance checks passed at desktop width and 320px, including modal copy feedback, explicit statuses, result retention, retry binding after editing the field, actual fetch cancellation, late-response protection, empty-result recovery, partial-candidate retries, and reset. The narrow frame had no horizontal overflow.
 
-Live public-provider checks passed for Spotify track/album, Deezer track/album, and YouTube Music track/album sources. They retained the expected artist and returned direct Deezer suggestions or clearly labelled destination searches. These checks used the local credential-free configuration; credential-backed branches use deterministic fixtures. Independent reviews identified redirect credential handling, rate-limit races, token cancellation, version distinctions, paginated albums, and duplicate track-title assignment; regression tests cover the fixes.
+Live public-provider checks passed for Spotify track/album, Deezer track/album, and YouTube Music track/album sources. They retained the expected artist and returned direct Deezer suggestions or clearly labelled destination searches. These checks used public provider endpoints. Independent reviews identified redirect credential handling, rate-limit races, token cancellation, version distinctions, paginated albums, and duplicate track-title assignment; regression tests cover the fixes.
+
+## Keyless operation · 2026-10-19
+
+Credential-based Spotify/YouTube integrations have been removed. Public source metadata, Deezer catalog matching, and clearly labelled Spotify/YouTube Music search links are the supported behavior. No API keys, developer accounts, or sign-in setup are required.

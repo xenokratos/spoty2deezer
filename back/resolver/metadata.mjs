@@ -75,36 +75,6 @@ export function parseYouTubeAlbum(html, ref) {
 		'html',
 	);
 }
-export function spotifyMedia(item, kind) {
-	if (!item?.id) throw new ProviderError('INVALID_METADATA');
-	const ref = {
-		id: item.id,
-		kind,
-		url: `https://open.spotify.com/${kind}/${item.id}`,
-	};
-	return media(ref, {
-		title: item.name,
-		artists: item.artists?.map((a) => a.name),
-		artwork: (item.images ?? item.album?.images)?.[0]?.url,
-		albumTitle: item.album?.name,
-		durationMs: item.duration_ms,
-		isrc: item.external_ids?.isrc,
-		upc: item.external_ids?.upc,
-		releaseDate: item.release_date ?? item.album?.release_date,
-		trackCount: item.total_tracks,
-		tracksComplete:
-			Array.isArray(item.tracks?.items) &&
-			!item.tracks.next &&
-			item.tracks.items.length === item.total_tracks,
-		isPlayable: item.is_playable,
-		tracks: item.tracks?.items?.map((t) => ({
-			title: t.name,
-			artists: t.artists?.map((a) => a.name) ?? [],
-			durationMs: t.duration_ms,
-			isrc: t.external_ids?.isrc,
-		})),
-	});
-}
 export function deezerMedia(item, kind) {
 	if (item?.error)
 		throw new ProviderError(
@@ -146,15 +116,4 @@ export function deezerMedia(item, kind) {
 			})),
 		},
 	);
-}
-export function durationMs(value) {
-	const m =
-		typeof value === 'string' &&
-		value.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?$/);
-	return m
-		? ((Number(m[1]) || 0) * 3600 +
-				(Number(m[2]) || 0) * 60 +
-				(Number(m[3]) || 0)) *
-				1000
-		: undefined;
 }

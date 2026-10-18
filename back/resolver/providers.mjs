@@ -2,13 +2,10 @@ import { parseMusicLink, reference } from '../lib/music-link.mjs';
 import { ProviderError } from './errors.mjs';
 import {
 	deezerMedia,
-	durationMs,
 	media,
 	parseSpotifyEmbed,
 	parseYouTubeAlbum,
-	spotifyMedia,
 } from './metadata.mjs';
-import { ResolutionPool } from './pool.mjs';
 
 export function searchLink(platform, source) {
 	const query = encodeURIComponent(
@@ -31,55 +28,10 @@ export function searchLink(platform, source) {
 }
 
 export function createProviders({ http, env = process.env }) {
-	let token,
-		tokenExpires = 0;
-	const tokenPool = new ResolutionPool({ ttlMs: 0, maxInflight: 1 });
-	const spotifyConfigured = Boolean(
-		env.SPOTIFY_CLIENT_ID && env.SPOTIFY_CLIENT_SECRET,
-	);
-	async function spotifyToken(signal) {
-		if (token && tokenExpires > Date.now() + 60000) return token;
-		return tokenPool.run(
-			'token',
-			async (sharedSignal) => {
-				const value = await http.get('https://accounts.spotify.com/api/token', {
-					signal: sharedSignal,
-					method: 'POST',
-					data: 'grant_type=client_credentials',
-					headers: {
-						Authorization: `Basic ${Buffer.from(`${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`).toString('base64')}`,
-						'Content-Type': 'application/x-www-form-urlencoded',
-					},
-				});
-				sharedSignal.throwIfAborted();
-				if (typeof value.access_token !== 'string')
-					throw new ProviderError('ACCESS_DENIED');
-				token = value.access_token;
-				tokenExpires = Date.now() + value.expires_in * 1000;
-				return token;
-			},
-			{ signal },
-		);
-	}
-	async function spotifyApi(path, { signal, params } = {}, refreshed = false) {
-		const access = await spotifyToken(signal);
-		try {
-			return await http.get(`https://api.spotify.com/v1/${path}`, {
-				signal,
-				params,
-				headers: { Authorization: `Bearer ${access}` },
-			});
-		} catch (error) {
-			if (error.code !== 'AUTH_EXPIRED' || refreshed) throw error;
-			token = undefined;
-			tokenExpires = 0;
-			return spotifyApi(path, { signal, params }, true);
-		}
-	}
-	function albumPage(value, platform, id) {
+	function albumPage(value, id) {
 		const url = new URL(value);
-		const host = platform === 'spotify' ? 'api.spotify.com' : 'api.deezer.com';
-		const path = `${platform === 'spotify' ? '/v1' : ''}/album${platform === 'spotify' ? 's' : ''}/${id}/tracks`;
+		const host = 'api.deezer.com';
+		const path = `/album/${id}/tracks`;
 		if (
 			url.protocol !== 'https:' ||
 			url.hostname !== host ||
@@ -90,32 +42,6 @@ export function createProviders({ http, env = process.env }) {
 		)
 			throw new ProviderError('INVALID_UPSTREAM_URL');
 		return url;
-	}
-	async function spotifyItem(kind, id, options) {
-		const value = await spotifyApi(`${kind}s/${id}`, {
-			...options,
-			params: { market: options.market },
-		});
-		if (kind === 'album') {
-			for (let page = 0; value.tracks?.next && page < 10; page++) {
-				const next = albumPage(value.tracks.next, 'spotify', id);
-				const batch = await spotifyApi(next.pathname.slice(4), {
-					signal: options.signal,
-					params: {
-						...Object.fromEntries(next.searchParams),
-						market: options.market,
-					},
-				});
-				if (!Array.isArray(batch.items))
-					throw new ProviderError('INVALID_METADATA');
-				value.tracks = {
-					...value.tracks,
-					items: [...value.tracks.items, ...batch.items],
-					next: batch.next,
-				};
-			}
-		}
-		return spotifyMedia(value, kind);
 	}
 	async function enrich(candidates, read) {
 		if (!candidates.length) return { candidates: [] };
@@ -129,15 +55,8 @@ export function createProviders({ http, env = process.env }) {
 	}
 
 	const spotify = {
-		capabilities: { catalog: spotifyConfigured, source: true, albums: true },
-		async get(ref, { signal, market }) {
-			if (spotifyConfigured) {
-				try {
-					return await spotifyItem(ref.kind, ref.id, { signal, market });
-				} catch (error) {
-					if (signal.aborted) throw error;
-				}
-			}
+		capabilities: { catalog: false, source: true, albums: true },
+		async get(ref, { signal }) {
 			try {
 				return parseSpotifyEmbed(
 					await http.get(
@@ -159,46 +78,8 @@ export function createProviders({ http, env = process.env }) {
 				);
 			}
 		},
-		async search(source, { signal, market }) {
-			if (!spotifyConfigured)
-				return {
-					searchOnly: true,
-					candidates: [searchLink('spotify', source)],
-				};
-			const identifier = source.kind === 'track' ? source.isrc : source.upc;
-			if (identifier) {
-				const data = await spotifyApi('search', {
-					signal,
-					params: {
-						q: `${source.kind === 'track' ? 'isrc' : 'upc'}:${identifier}`,
-						type: source.kind,
-						market,
-						limit: 10,
-					},
-				});
-				const items = data[`${source.kind}s`]?.items;
-				if (!Array.isArray(items)) throw new ProviderError('INVALID_METADATA');
-				const playable = items.filter((t) => t.is_playable !== false);
-				if (playable.length)
-					return source.kind === 'album'
-						? enrich(playable.slice(0, 3), (item) =>
-								spotifyItem('album', item.id, { signal, market }),
-							)
-						: { candidates: playable.map((t) => spotifyMedia(t, 'track')) };
-			}
-			const field = source.kind === 'album' ? 'album' : 'track';
-			const q = `${field}:"${source.title.replaceAll('"', '')}"${source.artist ? ` artist:"${source.artist.replaceAll('"', '')}"` : ''}`;
-			const data = await spotifyApi('search', {
-				signal,
-				params: { q, type: source.kind, market, limit: 10 },
-			});
-			const items = data[`${source.kind}s`]?.items;
-			if (!Array.isArray(items)) throw new ProviderError('INVALID_METADATA');
-			return source.kind === 'album'
-				? enrich(items.slice(0, 3), (item) =>
-						spotifyItem('album', item.id, { signal, market }),
-					)
-				: { candidates: items.map((t) => spotifyMedia(t, 'track')) };
+		async search(source) {
+			return { searchOnly: true, candidates: [searchLink('spotify', source)] };
 		},
 	};
 	const deezer = {
@@ -217,7 +98,7 @@ export function createProviders({ http, env = process.env }) {
 			);
 			if (ref.kind === 'album') {
 				for (let page = 0; value.tracks?.next && page < 10; page++) {
-					const next = albumPage(value.tracks.next, 'deezer', value.id);
+					const next = albumPage(value.tracks.next, value.id);
 					const batch = await http.get(next.href, { signal });
 					if (!Array.isArray(batch.data))
 						throw new ProviderError('INVALID_METADATA');
@@ -260,31 +141,9 @@ export function createProviders({ http, env = process.env }) {
 			);
 		},
 	};
-	function youtubeVideo(item) {
-		const snippet = item.snippet;
-		const channel =
-			snippet?.channelTitle?.replace(/\s*-\s*Topic$/, '').trim() ?? '';
-		let title = snippet?.title;
-		if (
-			title &&
-			channel &&
-			title.toLowerCase().startsWith(`${channel.toLowerCase()} - `)
-		)
-			title = title.slice(channel.length + 3);
-		return media(reference('youtubeMusic', 'track', item.id), {
-			title,
-			artists: channel ? [channel] : [],
-			artwork:
-				snippet?.thumbnails?.high?.url ?? snippet?.thumbnails?.default?.url,
-			durationMs: durationMs(item.contentDetails?.duration),
-			isPlayable:
-				item.status?.uploadStatus === 'processed' &&
-				item.status?.privacyStatus !== 'private',
-		});
-	}
 	const youtubeMusic = {
 		capabilities: {
-			catalog: Boolean(env.YOUTUBE_API_KEY),
+			catalog: false,
 			source: true,
 			albums: true,
 		},
@@ -297,24 +156,6 @@ export function createProviders({ http, env = process.env }) {
 					}),
 					ref,
 				);
-			if (env.YOUTUBE_API_KEY) {
-				try {
-					const result = await http.get(
-						'https://www.googleapis.com/youtube/v3/videos',
-						{
-							signal,
-							params: {
-								key: env.YOUTUBE_API_KEY,
-								id: ref.id,
-								part: 'snippet,contentDetails,status',
-							},
-						},
-					);
-					if (result.items?.[0]) return youtubeVideo(result.items[0]);
-				} catch (error) {
-					if (signal.aborted) throw error;
-				}
-			}
 			const value = await http.get('https://www.youtube.com/oembed', {
 				signal,
 				params: { url: ref.url, format: 'json' },
@@ -331,56 +172,10 @@ export function createProviders({ http, env = process.env }) {
 				'oembed',
 			);
 		},
-		async search(source, { signal, market }) {
-			if (!env.YOUTUBE_API_KEY || source.kind === 'album')
-				return {
-					searchOnly: true,
-					candidates: [searchLink('youtubeMusic', source)],
-				};
-			const search = await http.get(
-				'https://www.googleapis.com/youtube/v3/search',
-				{
-					signal,
-					params: {
-						key: env.YOUTUBE_API_KEY,
-						q: `${source.artist} ${source.title}`,
-						type: 'video',
-						part: 'snippet',
-						maxResults: 5,
-						regionCode: market,
-						videoCategoryId: '10',
-					},
-				},
-			);
-			if (!Array.isArray(search.items))
-				throw new ProviderError('INVALID_METADATA');
-			const ids = search.items
-				.map((i) => i.id?.videoId)
-				.filter(Boolean)
-				.join(',');
-			if (!ids) return { candidates: [] };
-			const result = await http.get(
-				'https://www.googleapis.com/youtube/v3/videos',
-				{
-					signal,
-					params: {
-						key: env.YOUTUBE_API_KEY,
-						id: ids,
-						part: 'snippet,contentDetails,status',
-					},
-				},
-			);
-			if (!Array.isArray(result.items))
-				throw new ProviderError('INVALID_METADATA');
+		async search(source) {
 			return {
-				candidates: result.items
-					.filter(
-						(i) =>
-							!i.contentDetails?.regionRestriction?.blocked?.includes(market) &&
-							(!i.contentDetails?.regionRestriction?.allowed ||
-								i.contentDetails.regionRestriction.allowed.includes(market)),
-					)
-					.map(youtubeVideo),
+				searchOnly: true,
+				candidates: [searchLink('youtubeMusic', source)],
 			};
 		},
 	};

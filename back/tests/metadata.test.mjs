@@ -3,7 +3,6 @@ import test from 'node:test';
 import { reference } from '../lib/music-link.mjs';
 import {
 	deezerMedia,
-	durationMs,
 	parseSpotifyEmbed,
 	parseYouTubeAlbum,
 } from '../resolver/metadata.mjs';
@@ -48,7 +47,7 @@ test('YouTube Music album metadata retains artist, title, and album type', () =>
 		),
 	);
 });
-test('Deezer seconds and YouTube ISO durations become milliseconds', () => {
+test('Deezer seconds become milliseconds', () => {
 	assert.equal(
 		deezerMedia(
 			{ id: 1, title: 'Song', duration: 245, artist: { name: 'Artist' } },
@@ -56,9 +55,6 @@ test('Deezer seconds and YouTube ISO durations become milliseconds', () => {
 		).durationMs,
 		245000,
 	);
-	assert.equal(durationMs('PT4M5S'), 245000);
-	assert.equal(durationMs('PT1H2M3S'), 3723000);
-	assert.equal(durationMs('bad'), undefined);
 	assert.throws(() => deezerMedia({ error: { code: 800 } }, 'track'), {
 		code: 'NOT_FOUND',
 	});

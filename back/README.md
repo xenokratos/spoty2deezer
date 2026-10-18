@@ -12,7 +12,7 @@ Node 20.18.1+ is required by the parser; Node 24 is the tested deployment target
 
 ## API
 
-`GET /health` reports server health. `GET /api/capabilities` reports whether credential-backed catalog search is configured for each provider; it does not certify current provider access or expose credentials.
+`GET /health` reports server health. `GET /api/capabilities` reports the keyless capabilities: public metadata for all three platforms, direct Deezer catalog matching, and search links for Spotify and YouTube Music. It does not certify current provider availability.
 
 `POST /api/resolve` accepts:
 
@@ -40,12 +40,10 @@ A `partial` destination retains checked candidates when others could not be fetc
 | `DEFAULT_MARKET` | `FR` | Catalog market; included in cache identity |
 | `RESOLVER_CACHE_TTL_MS` | `300000` | Public metadata/result cache TTL; zero disables caching, capped at one hour |
 | `CORS_ORIGIN` | Any origin | Comma-separated frontend origins; `*` allows any origin |
-| `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | Unset | Optional server-to-server Spotify catalog access |
-| `YOUTUBE_API_KEY` | Unset | Optional YouTube metadata/video search access |
 | `METADATA_USER_AGENT` | `curl/8.7.1` | Public YouTube Music album-page lookup only; interactive user agents may redirect to consent |
 | `ENABLE_LEGACY_PROXY` | `false` | Temporary compatibility for an older deployed frontend |
 
-Without Spotify credentials, source metadata uses structured embed data and then oEmbed; Spotify destinations remain search links. Without a YouTube key, tracks use oEmbed and destinations remain search links. YouTube albums use page metadata and album destinations remain searches even with a key. No access token or API key is sent to the browser.
+No developer account, API key, or authentication setup is required. Spotify sources use structured public embed data and then oEmbed. YouTube tracks use public oEmbed; YouTube albums use public page metadata. Spotify and YouTube Music destinations are labelled search links. Deezer provides direct catalog suggestions through its public endpoints.
 
 ## Reliability and matching
 
@@ -66,4 +64,4 @@ The old `ALLOWED_DOMAINS`, `ALLOWLIST`, `REQUEST_TIMEOUT`, and `MAX_REDIRECTS` s
 
 ## Tests
 
-Run `npm test`. Fixture and integration checks cover canonical URLs, missing metadata, matching ambiguity, identifier conflicts, remaster years, album pagination, rate limits, redirect credentials, provider isolation, cache expiry, concurrent callers, cancellation, and HTTP disconnects. They do not require real credentials or external network access.
+Run `npm test`. Fixture and integration checks cover canonical URLs, missing metadata, matching ambiguity, identifier conflicts, remaster years, album pagination, rate limits, redirect credentials, provider isolation, cache expiry, concurrent callers, cancellation, and HTTP disconnects. They require no accounts, keys, or external network access.

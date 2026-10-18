@@ -4,13 +4,10 @@ import { ProviderError } from './errors.mjs';
 
 const hosts = new Set([
 	'open.spotify.com',
-	'accounts.spotify.com',
-	'api.spotify.com',
 	'api.deezer.com',
 	'www.deezer.com',
 	'deezer.com',
 	'link.deezer.com',
-	'www.googleapis.com',
 	'www.youtube.com',
 	'music.youtube.com',
 	'youtube.com',

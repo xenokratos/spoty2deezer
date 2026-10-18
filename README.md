@@ -35,17 +35,17 @@ Equivalent concurrent requests share work. Cancelling one caller does not cancel
 
 | Provider | Source metadata | Destination matching |
 | --- | --- | --- |
-| Spotify | Catalog API when configured; structured embed/oEmbed fallback | Catalog search with app credentials; otherwise a labelled search link |
+| Spotify | Public structured embed/oEmbed metadata | Labelled search link |
 | Deezer | Public catalog API, including track/album and ISRC/UPC data | Identifier lookup followed by catalog search |
-| YouTube Music | YouTube API/oEmbed for tracks; public album-page metadata for `OLAK5uy_` albums | YouTube video search with an API key; otherwise a labelled search link. Albums remain search links. |
+| YouTube Music | Public oEmbed for tracks; album-page metadata for `OLAK5uy_` albums | Labelled search link |
 
-The configured API branches are fixture-tested. Local live checks use public metadata and Deezer because Spotify/YouTube credentials are not configured. Access and quotas depend on the provider application. HTML metadata remains a fallback that may change independently of this app. ISRC equality is evidence of recording identity, not a guarantee of identical mastering or playback availability.
+The app requires no developer accounts, API keys, or user sign-in. Public metadata lookups and Deezer catalog requests can still be rate-limited or become unavailable. HTML metadata may change independently of this app. ISRC equality is evidence of recording identity, not a guarantee of identical mastering or playback availability.
 
 Track links and albums from all three services are supported. Generic playlist transfers are not implemented. Previews are independent of matching; unavailable YouTube embeds show a compact fallback link.
 
 ## Configuration and deployment
 
-See [backend configuration](back/README.md) and [frontend documentation](front/README.md). Copy `back/.env.example` to `back/.env` if configuring credentials. Secrets belong only in the backend environment.
+See [backend configuration](back/README.md) and [frontend documentation](front/README.md). Copy `back/.env.example` to `back/.env` to customize server settings.
 
 Production frontend builds accept `VITE_API_URL`; the existing `VITE_PROXY_TARGET` variable remains a compatibility alias. `render.yaml` deploys the backend from `back/` using Node 24 and `npm ci`.
 

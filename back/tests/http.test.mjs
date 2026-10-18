@@ -88,7 +88,7 @@ test('credential sensitivity survives same-host redirects and header case change
 						headers: {
 							location:
 								calls === 1
-									? 'https://www.googleapis.com/next?key=test'
+									? 'https://music.youtube.com/next?key=test'
 									: 'https://api.deezer.com/collect?key=test',
 						},
 					};
@@ -96,7 +96,7 @@ test('credential sensitivity survives same-host redirects and header case change
 			},
 		});
 		await assert.rejects(
-			http.get('https://www.googleapis.com/search', options),
+			http.get('https://music.youtube.com/search', options),
 			{ code: 'INVALID_UPSTREAM_REDIRECT' },
 		);
 		assert.equal(calls, 2);
