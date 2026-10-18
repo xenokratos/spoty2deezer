@@ -1,7 +1,7 @@
-import { LinkConverter } from './components/link-converter';
+import { RelayApp } from './components/relay/RelayApp';
 
 function App() {
-	return <LinkConverter />;
+	return <RelayApp />;
 }
 
 export default App;

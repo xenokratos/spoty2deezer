@@ -41,14 +41,6 @@ export const useSpotifyToDeezer = () => {
 				return deezerService
 					.findTrackMatches(spotifyTrack)
 					.then((deezerMatches) => {
-						if (deezerMatches.length === 0) {
-							return Promise.reject(
-								new Error(
-									'No matching tracks found on Deezer. Try adjusting the search terms or check if the track exists on Deezer.',
-								),
-							);
-						}
-
 						return { spotifyTrack, deezerMatches };
 					});
 			});

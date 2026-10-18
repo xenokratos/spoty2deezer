@@ -38,6 +38,6 @@
 		}
 	},
 	"files": {
-		"includes": ["**", "!**/dist"]
+		"includes": ["**", "!**/dist", "!**/artifacts"]
 	}
 }

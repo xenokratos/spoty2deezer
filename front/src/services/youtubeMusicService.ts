@@ -61,6 +61,10 @@ class YouTubeMusicService {
 				},
 			);
 
+			if (typeof oembedData?.title !== 'string' || !oembedData.title.trim()) {
+				throw new Error('YouTube Music returned no track title');
+			}
+
 			// Parse title and artist from the oEmbed response
 			const title = oembedData.title || 'Unknown Track';
 			const author = oembedData.author_name || 'Unknown Artist';
@@ -78,25 +82,8 @@ class YouTubeMusicService {
 				},
 			};
 		} catch (error) {
-			// Fallback to generic track if oEmbed fails
-			console.warn(
-				'Failed to fetch YouTube track info, using generic data:',
-				error,
-			);
-			return {
-				id: videoId,
-				name: 'Track from YouTube Music',
-				artists: ['Unknown Artist'],
-				channel: 'Unknown Channel',
-				url: `https://music.youtube.com/watch?v=${videoId}`,
-				thumbnail: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
-				images: [
-					{ url: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` },
-				],
-				external_urls: {
-					youtube: `https://music.youtube.com/watch?v=${videoId}`,
-				},
-			};
+			console.warn('Failed to fetch YouTube track information:', error);
+			throw error;
 		}
 	}
 

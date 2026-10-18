@@ -57,6 +57,9 @@ Thumbs.db
 # Optional Biome cache
 .biome/
 
+# Local design explorations and preview exports
+/artifacts/
+
 # TypeScript
 *.tsbuildinfo
 

@@ -1,0 +1,985 @@
+.relay-app,
+.relay-dialog {
+	--canvas: #f7f7f3;
+	--surface: #fff;
+	--ink: #202c35;
+	--muted: #4d5962;
+	--line: #d8d9d3;
+	--control-line: #7c8588;
+	--azure: #006fc9;
+	--azure-dark: #005ca5;
+	--soft: #efefeb;
+	--error: #963526;
+	--error-bg: #fff0e9;
+	color: var(--ink);
+	font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	font-size: 15px;
+	line-height: 1.6;
+	color-scheme: light;
+}
+
+.relay-app *,
+.relay-dialog * {
+	box-sizing: border-box;
+}
+.relay-app {
+	background: var(--canvas);
+	min-height: 100svh;
+	display: flex;
+	flex-direction: column;
+}
+.relay-app button,
+.relay-app input,
+.relay-app select,
+.relay-dialog button,
+.relay-dialog input {
+	font: inherit;
+}
+.relay-app button,
+.relay-dialog button {
+	cursor: pointer;
+}
+.relay-app button:disabled,
+.relay-dialog button:disabled {
+	cursor: default;
+}
+.relay-app h1,
+.relay-app h2,
+.relay-app h3,
+.relay-app h4,
+.relay-dialog h2,
+.relay-dialog h3 {
+	color: var(--ink);
+	line-height: 1.2;
+	margin: 0;
+}
+:where(.relay-app, .relay-dialog) p {
+	margin: 0;
+}
+.relay-app button:focus-visible,
+.relay-app a:focus-visible,
+.relay-app input:focus-visible,
+.relay-app select:focus-visible,
+.relay-dialog button:focus-visible,
+.relay-dialog input:focus-visible {
+	outline: 3px solid var(--azure);
+	outline-offset: 4px;
+}
+.relay-app .sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+.skip-link {
+	position: absolute;
+	z-index: 5;
+	top: 12px;
+	left: 16px;
+	padding: 10px 16px;
+	border-radius: 6px;
+	background: var(--surface);
+	color: var(--azure-dark);
+	transform: translateY(-160%);
+}
+.skip-link:focus {
+	transform: translateY(0);
+}
+.relay-icon {
+	width: 18px;
+	height: 18px;
+	flex-shrink: 0;
+	vertical-align: middle;
+}
+.relay-app .muted,
+.relay-dialog .muted {
+	color: var(--muted);
+}
+.relay-app .eyebrow,
+.relay-dialog .eyebrow {
+	color: var(--muted);
+	font-size: 12px;
+	letter-spacing: 1.7px;
+	text-transform: uppercase;
+	font-weight: 600;
+	margin-bottom: 12px;
+}
+.app-header {
+	background: var(--surface);
+	border-bottom: 1px solid var(--line);
+}
+.header-inner {
+	max-width: 1120px;
+	margin: auto;
+	padding: 24px 32px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+}
+.relay-app .brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--ink);
+	font-size: 23px;
+	font-weight: 650;
+	letter-spacing: -0.8px;
+	text-decoration: none;
+}
+.brand-icon {
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	background: var(--azure);
+	color: white;
+	border-radius: 10px;
+}
+.brand-icon .relay-icon {
+	width: 21px;
+	height: 21px;
+}
+.app-header nav {
+	display: flex;
+	align-items: center;
+	gap: 26px;
+}
+.relay-app .text-button,
+.relay-dialog .text-button {
+	border: 0;
+	background: transparent;
+	color: var(--muted);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	padding: 5px 0;
+	font-size: 13px;
+	font-weight: 500;
+	text-align: left;
+}
+.relay-app .text-button:hover {
+	color: var(--azure-dark);
+	text-decoration: underline;
+	text-underline-offset: 4px;
+}
+.language-picker select {
+	padding: 6px 8px;
+	color: var(--ink);
+	background: var(--canvas);
+	border: 1px solid var(--control-line);
+	border-radius: 6px;
+	font-size: 12px;
+}
+.app-main {
+	width: 100%;
+	max-width: 1120px;
+	padding: 82px 40px 64px;
+	margin: 0 auto;
+	flex: 1;
+}
+.hero {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 64px;
+	align-items: center;
+}
+.relay-app h1 {
+	font-size: clamp(40px, 5vw, 58px);
+	letter-spacing: -2.8px;
+	line-height: 1.07;
+	font-weight: 600;
+}
+.hero-description {
+	margin-top: 24px;
+	color: var(--muted);
+	font-size: 17px;
+	max-width: 410px;
+	line-height: 1.7;
+}
+.platforms {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	flex-wrap: wrap;
+	margin-top: 28px;
+}
+.platform {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	font-size: 12px;
+	font-weight: 550;
+}
+.platform-icon {
+	display: inline-grid;
+	place-items: center;
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 50%;
+	width: 27px;
+	height: 27px;
+}
+.platform-icon .relay-icon {
+	width: 15px;
+	height: 15px;
+}
+.converter-panel {
+	background: var(--surface);
+	padding: 28px;
+	border: 1px solid var(--line);
+	border-radius: 17px;
+	box-shadow: 0 4px 18px #202c3503;
+}
+.field-label {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	margin-bottom: 10px;
+}
+.input-row {
+	border: 1px solid var(--control-line);
+	border-radius: 8px;
+	background: var(--canvas);
+	padding: 9px 12px;
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	transition:
+		border-color 160ms,
+		box-shadow 160ms;
+}
+.input-row:focus-within {
+	border-color: var(--azure);
+	outline: 2px solid var(--azure);
+	outline-offset: 2px;
+}
+.input-row input {
+	color: var(--ink);
+	min-width: 0;
+	width: 100%;
+	border: 0;
+	background: transparent;
+	padding: 7px 0;
+	font-size: 14px;
+}
+.input-row input::placeholder {
+	color: var(--muted);
+	opacity: 1;
+}
+.relay-app .input-row input:focus-visible {
+	outline: none;
+}
+.relay-app .icon-button,
+.relay-dialog .icon-button {
+	border: 0;
+	background: transparent;
+	color: var(--muted);
+	padding: 6px;
+	display: inline-grid;
+	place-items: center;
+	border-radius: 6px;
+}
+.icon-button:hover {
+	background: var(--soft);
+}
+.detected {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--azure-dark);
+	margin-top: 12px;
+}
+.relay-app .button,
+.relay-dialog .button {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	padding: 11px 17px;
+	border-radius: 7px;
+	border: 1px solid transparent;
+	font-size: 13px;
+	font-weight: 600;
+	text-decoration: none;
+	transition:
+		background-color 160ms,
+		border-color 160ms,
+		box-shadow 180ms,
+		transform 180ms;
+}
+.primary {
+	color: white;
+	background: var(--azure);
+}
+.relay-app .secondary,
+.relay-dialog .secondary {
+	color: var(--ink);
+	background: var(--surface);
+	border-color: var(--control-line);
+}
+.full-width {
+	width: 100%;
+	margin-top: 16px;
+}
+.button:disabled {
+	opacity: 1;
+	background: #e2e3df;
+	color: var(--muted);
+	border-color: transparent;
+	box-shadow: none;
+}
+.micro {
+	font-size: 12px;
+	color: var(--muted);
+	margin-top: 12px;
+}
+.relay-app .example-button {
+	color: var(--azure-dark);
+	margin-top: 14px;
+	text-decoration: underline;
+	text-underline-offset: 4px;
+}
+.error-message {
+	display: flex;
+	align-items: start;
+	gap: 10px;
+	background: var(--error-bg);
+	color: var(--error);
+	padding: 14px;
+	margin-top: 16px;
+	border-radius: 7px;
+	font-size: 13px;
+}
+.error-message .relay-icon {
+	margin-top: 2px;
+}
+.error-message strong {
+	font-weight: 550;
+}
+.error-message p {
+	margin-top: 7px;
+}
+.relay-app .input-invalid {
+	border-color: var(--error);
+}
+.how-it-works {
+	margin-top: 64px;
+	padding-top: 28px;
+	border-top: 1px solid var(--line);
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 36px;
+}
+.step-number {
+	font:
+		12px ui-monospace,
+		monospace;
+	color: var(--muted);
+}
+.relay-app .how-it-works h2 {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	font-size: 15px;
+	font-weight: 600;
+	margin: 12px 0 8px;
+}
+.how-it-works .relay-icon {
+	color: var(--azure-dark);
+}
+.how-it-works p {
+	color: var(--muted);
+	font-size: 13px;
+}
+.app-footer {
+	border-top: 1px solid var(--line);
+}
+.app-footer > div {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+	max-width: 1120px;
+	margin: auto;
+	padding: 22px 40px;
+	color: var(--muted);
+	font-size: 12px;
+}
+.hero-compact h1 {
+	font-size: 40px;
+	letter-spacing: -1.8px;
+}
+.hero-compact .hero-description {
+	font-size: 15px;
+	margin-top: 16px;
+}
+.hero-compact .platforms {
+	margin-top: 20px;
+}
+.results-anchor {
+	scroll-margin-top: 30px;
+}
+.results-section {
+	margin-top: 60px;
+	animation: relay-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.results-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 20px;
+	margin-bottom: 28px;
+}
+.relay-app h2,
+.relay-dialog h2 {
+	font-size: 29px;
+	font-weight: 550;
+	letter-spacing: -0.8px;
+}
+.source-card {
+	display: flex;
+	gap: 20px;
+	align-items: center;
+	padding-bottom: 28px;
+	margin-bottom: 28px;
+	border-bottom: 1px solid var(--line);
+	min-width: 0;
+}
+.source-card > div:last-child {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.source-card .eyebrow {
+	margin-bottom: 8px;
+}
+.source-card h3 {
+	font-size: 24px;
+	font-weight: 550;
+	letter-spacing: -0.6px;
+	margin-bottom: 6px;
+}
+.source-card .muted {
+	font-size: 14px;
+}
+.artwork {
+	width: 84px;
+	height: 84px;
+	flex-shrink: 0;
+	border-radius: 7px;
+	background: var(--soft);
+	overflow: hidden;
+	display: grid;
+	place-items: center;
+	color: var(--muted);
+}
+.artwork img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.artwork > .relay-icon {
+	width: 30px;
+	height: 30px;
+}
+.media-type {
+	display: inline-block;
+	font-size: 12px;
+	color: var(--muted);
+	margin-top: 5px;
+}
+.destinations {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 24px;
+	align-items: start;
+}
+.destination {
+	background: var(--surface);
+	border: 1px solid var(--line);
+	padding: 24px;
+	border-radius: 16px;
+	min-width: 0;
+	transition:
+		box-shadow 180ms,
+		transform 180ms;
+}
+.destination-heading {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 23px;
+}
+.badge {
+	font-size: 12px;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	border-radius: 20px;
+	background: var(--soft);
+	color: var(--azure-dark);
+	padding: 4px 9px;
+}
+.badge .relay-icon {
+	width: 13px;
+	height: 13px;
+}
+.badge.warning {
+	color: var(--error);
+	background: var(--error-bg);
+}
+.destination h3 {
+	font-size: 21px;
+	font-weight: 550;
+	letter-spacing: -0.4px;
+	overflow-wrap: anywhere;
+}
+.match-artist {
+	margin-top: 5px;
+	font-size: 13px;
+	overflow-wrap: anywhere;
+}
+.match-hint {
+	color: var(--muted);
+	font-size: 13px;
+	margin-top: 18px;
+}
+.media-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 20px;
+}
+.media-actions > * {
+	flex: 1;
+}
+.destination-links {
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+	border-top: 1px solid var(--line);
+	padding-top: 16px;
+	margin-top: 20px;
+}
+.destination-links .relay-icon {
+	width: 15px;
+	height: 15px;
+	transition: transform 160ms;
+}
+.alternate {
+	border-top: 1px solid var(--line);
+	padding-top: 18px;
+	margin-top: 18px;
+	animation: relay-enter 180ms ease both;
+}
+.alternate h4 {
+	font-size: 16px;
+	margin: 5px 0;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+.alternate p {
+	font-size: 13px;
+}
+.empty-destination {
+	display: flex;
+	align-items: start;
+	flex-direction: column;
+	gap: 16px;
+}
+.empty-destination > .relay-icon {
+	color: var(--muted);
+}
+.empty-destination p {
+	font-size: 13px;
+}
+.retained-result {
+	padding: 12px;
+	margin-bottom: 18px;
+	border-radius: 6px;
+	background: var(--soft);
+	font-size: 13px;
+}
+.loading-panel {
+	margin-top: 40px;
+	padding: 30px;
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	animation: relay-enter 220ms ease both;
+}
+.loading-panel h2 {
+	margin-bottom: 10px;
+}
+.service-statuses {
+	margin: 24px 0 16px;
+}
+.service-status {
+	padding: 16px 0;
+	border-bottom: 1px solid var(--line);
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 13px;
+}
+.service-status > .relay-icon {
+	margin-left: auto;
+	color: var(--azure-dark);
+}
+.icon-loader {
+	animation: relay-spin 1s linear infinite;
+}
+.relay-dialog {
+	width: min(540px, calc(100% - 32px));
+	max-height: calc(100svh - 48px);
+	padding: 30px;
+	margin: auto;
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 18px;
+	box-shadow: 0 24px 80px #17263026;
+}
+.relay-dialog[open] {
+	animation: relay-dialog-enter 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.relay-dialog::backdrop {
+	background: #17263080;
+}
+.dialog-heading {
+	display: flex;
+	align-items: start;
+	justify-content: space-between;
+	gap: 18px;
+	margin-bottom: 18px;
+}
+.dialog-heading .icon-button {
+	margin: -5px -5px 0 0;
+	min-width: 36px;
+	min-height: 36px;
+}
+.relay-dialog > .muted {
+	font-size: 14px;
+}
+.help-service {
+	padding: 18px 0;
+	border-bottom: 1px solid var(--line);
+}
+.help-service p {
+	font-size: 13px;
+	color: var(--muted);
+	margin: 7px 0;
+}
+.help-service code {
+	display: block;
+	font:
+		12px / 1.9 ui-monospace,
+		monospace;
+	color: var(--muted);
+	overflow-wrap: anywhere;
+}
+.notice {
+	display: flex;
+	align-items: start;
+	gap: 8px;
+	padding: 13px;
+	background: var(--soft);
+	border-radius: 7px;
+	font-size: 13px;
+	margin-top: 18px;
+}
+.notice .relay-icon {
+	margin-top: 2px;
+}
+.manual-link {
+	display: block;
+	width: 100%;
+	border: 1px solid var(--control-line);
+	background: var(--canvas);
+	color: var(--ink);
+	padding: 12px;
+	border-radius: 7px;
+	margin: 9px 0 20px;
+	font-size: 16px;
+}
+.relay-dialog .field-label {
+	margin-top: 20px;
+}
+.relay-dialog .source-card {
+	padding-bottom: 20px;
+	margin: 22px 0;
+}
+.relay-dialog .source-card h3 {
+	font-size: 20px;
+}
+.relay-dialog .artwork {
+	width: 64px;
+	height: 64px;
+}
+.toast-region {
+	position: fixed;
+	bottom: 28px;
+	left: 16px;
+	right: 16px;
+	display: flex;
+	justify-content: center;
+	pointer-events: none;
+	z-index: 10;
+}
+.copy-toast {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	background: var(--ink);
+	color: var(--surface);
+	border-radius: 10px;
+	padding: 14px 20px;
+	box-shadow: 0 5px 25px #17263020;
+	font-size: 14px;
+	animation: relay-enter 200ms ease both;
+}
+.copy-toast .relay-icon {
+	color: #a9e3bd;
+}
+.dialog-feedback {
+	display: block;
+}
+.dialog-feedback > span {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 16px;
+	padding: 12px;
+	border-radius: 7px;
+	background: var(--soft);
+	color: var(--ink);
+	font-size: 13px;
+}
+@media (hover: hover) {
+	.primary:hover:not(:disabled) {
+		background: var(--azure-dark);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px #006fc926;
+	}
+	.secondary:hover:not(:disabled) {
+		background: var(--soft);
+	}
+	.destination:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px #202c3508;
+	}
+}
+.button:active:not(:disabled) {
+	transform: translateY(1px);
+}
+@keyframes relay-enter {
+	from {
+		opacity: 0.3;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+@keyframes relay-dialog-enter {
+	from {
+		opacity: 0.3;
+		transform: translateY(10px) scale(0.985);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+@keyframes relay-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+@media (max-width: 800px) {
+	.app-main {
+		padding: 55px 28px;
+	}
+	.hero {
+		gap: 32px;
+	}
+	.relay-app h1 {
+		font-size: 44px;
+		letter-spacing: -2px;
+	}
+	.converter-panel {
+		padding: 22px;
+	}
+	.platforms {
+		gap: 10px;
+	}
+	.destination {
+		padding: 20px;
+	}
+}
+@media (max-width: 640px) {
+	.header-inner {
+		padding: 20px;
+		gap: 14px;
+	}
+	.app-header nav {
+		gap: 16px;
+	}
+	.relay-app .converter-nav {
+		display: none;
+	}
+	.relay-app .brand {
+		font-size: 21px;
+		gap: 8px;
+	}
+	.brand-icon {
+		width: 30px;
+		height: 30px;
+		border-radius: 8px;
+	}
+	.app-main {
+		padding: 40px 20px 48px;
+	}
+	.hero {
+		grid-template-columns: 1fr;
+		gap: 30px;
+	}
+	.hero-description {
+		font-size: 16px;
+		margin-top: 20px;
+	}
+	.converter-panel {
+		padding: 22px;
+	}
+	.input-row input {
+		font-size: 16px;
+	}
+	.relay-app .hero-compact h1 {
+		font-size: 36px;
+	}
+	.how-it-works {
+		grid-template-columns: 1fr;
+		margin-top: 36px;
+		padding-top: 24px;
+		gap: 22px;
+	}
+	.how-it-works > div {
+		display: grid;
+		grid-template-columns: 24px 1fr;
+		column-gap: 14px;
+		align-items: baseline;
+	}
+	.how-it-works h2 {
+		margin: 0 0 6px;
+	}
+	.how-it-works p {
+		grid-column: 2;
+	}
+	.destinations {
+		grid-template-columns: 1fr;
+		gap: 18px;
+	}
+	.results-section {
+		margin-top: 40px;
+	}
+	.source-card {
+		gap: 14px;
+	}
+	.source-card h3 {
+		font-size: 22px;
+	}
+	.artwork {
+		width: 68px;
+		height: 68px;
+	}
+	.results-heading {
+		align-items: start;
+	}
+	.relay-app h2 {
+		font-size: 26px;
+	}
+	.loading-panel {
+		padding: 22px;
+	}
+	.service-status {
+		flex-wrap: wrap;
+	}
+	.app-footer > div {
+		padding: 20px;
+	}
+	.relay-dialog {
+		width: calc(100% - 20px);
+		padding: 24px;
+		max-height: calc(100svh - 24px);
+		border-radius: 16px;
+	}
+	.relay-dialog h2 {
+		font-size: 26px;
+	}
+}
+@media (max-width: 360px) {
+	.header-inner {
+		padding: 16px;
+	}
+	.app-header nav {
+		gap: 10px;
+	}
+	.app-header .text-button {
+		font-size: 12px;
+	}
+	.app-header .text-button > .relay-icon {
+		display: none;
+	}
+	.app-main {
+		padding: 32px 16px;
+	}
+	.converter-panel {
+		padding: 18px;
+	}
+	.platforms {
+		gap: 10px;
+	}
+	.platform {
+		font-size: 11px;
+	}
+}
+@media (pointer: coarse) {
+	.relay-app button,
+	.relay-app select,
+	.relay-dialog button {
+		min-height: 44px;
+	}
+	.relay-app .icon-button,
+	.relay-dialog .icon-button {
+		min-width: 44px;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.relay-app *,
+	.relay-dialog *,
+	.relay-app .relay-icon,
+	.relay-dialog[open] {
+		animation: none;
+		transition: none;
+		scroll-behavior: auto;
+	}
+	.relay-app .primary:hover,
+	.relay-app .button:active,
+	.relay-app .destination:hover,
+	.relay-dialog .primary:hover {
+		transform: none;
+	}
+}

@@ -8,7 +8,7 @@ import type {
 	DeezerSearchResponse,
 	DeezerTrack,
 } from '../types/deezer.types';
-import { fetchWithProxy } from '../utils/responseWrapper';
+import { fetchWithProxy } from '../utils/responseWrapper.ts';
 
 interface ScoredTrack {
 	track: DeezerTrack;
@@ -350,6 +350,8 @@ class DeezerService {
 			highQuality: [],
 			exploreMore: [],
 		};
+		let completedSearches = 0;
+		let lastSearchError: unknown;
 
 		for (const query of searchQueries) {
 			if (!query || query.trim() === '' || query.includes('undefined'))
@@ -357,6 +359,7 @@ class DeezerService {
 
 			try {
 				const results = await this.searchTrack(query, 3); // Reduced to 3 results
+				completedSearches += 1;
 
 				if (results.length > 0) {
 					// Find all matches and categorize them
@@ -365,10 +368,12 @@ class DeezerService {
 					allMatches.exploreMore.push(...matches.exploreMore);
 				}
 			} catch (searchError) {
+				lastSearchError = searchError;
 				console.warn(`Search failed for query "${query}":`, searchError);
 				// Continue with other queries
 			}
 		}
+		if (completedSearches === 0 && lastSearchError) throw lastSearchError;
 
 		// Remove duplicates and sort by score within each category
 		const uniqueHighQuality = new Map<number, DeezerTrack>();
@@ -592,7 +597,7 @@ class DeezerService {
 			});
 
 			if (!data || !data.data || !Array.isArray(data.data)) {
-				return [];
+				throw new Error('Invalid Deezer album search response');
 			}
 
 			// Score and filter matches
@@ -682,9 +687,8 @@ class DeezerService {
 
 			return [];
 		} catch (error) {
-			// Return empty array on error rather than throwing
 			console.warn('Error searching for album matches:', error);
-			return [];
+			throw error;
 		}
 	}
 }

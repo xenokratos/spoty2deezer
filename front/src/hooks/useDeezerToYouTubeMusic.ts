@@ -43,14 +43,6 @@ export const useDeezerToYouTubeMusic = () => {
 					images: [{ url: deezerTrack.cover }],
 				})
 				.then((youtubeMatches) => {
-					if (youtubeMatches.length === 0) {
-						return Promise.reject(
-							new Error(
-								'No matching tracks found on YouTube Music. Try searching manually with the track details.',
-							),
-						);
-					}
-
 					return { deezerTrack, youtubeMatches };
 				});
 		});

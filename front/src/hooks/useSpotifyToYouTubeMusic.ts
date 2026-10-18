@@ -41,14 +41,6 @@ export const useSpotifyToYouTubeMusic = () => {
 				return youtubeMusicService
 					.findTrackMatches(spotifyTrack)
 					.then((youtubeMatches: YouTubeMusicTrack[]) => {
-						if (youtubeMatches.length === 0) {
-							return Promise.reject(
-								new Error(
-									'No matching tracks found on YouTube Music. Try searching manually with the track details.',
-								),
-							);
-						}
-
 						return { spotifyTrack, youtubeMatches };
 					});
 			});

@@ -1,169 +1,74 @@
-# Spotify to Deezer Converter
+# MusConv · Relay
 
-Convert Spotify track links to equivalent Deezer links, or YouTube Music links effortlessly. Built with React, Vite, and Tailwind CSS.
+A responsive music-link converter with calm off-white backgrounds, white surfaces,
+Azure actions, line icons, and motion that respects reduced-motion preferences.
+Tracks can come from Spotify, Deezer, or YouTube Music; Spotify albums are also
+supported. Results distinguish direct suggestions from service search links.
 
-## Features
+## Run locally
 
-- 🎵 Convert Spotify track URLs to Deezer links
-- 🔍 Find up to 5 closest matches on Deezer
-- 🌐 Web-based application
-- 🎨 Modern UI with responsive design
-- ⚡ Fast and accurate matching using Levenshtein distance
-- 📋 Copy links to clipboard
-- 🔗 Open tracks directly in Deezer
+Use pnpm 9 and Node 20.19+ for Vite. From this directory:
 
-## Tech Stack
-
-- **React** - Modern web framework for building user interfaces
-- **Vite** - Fast build tool and development server
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first CSS framework
-- **Biome** - Fast linter and formatter
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm (or npm/yarn)
-
-### Installation
-
-```bash
-# Install dependencies
-pnpm install
-
-# Start development server
+```sh
+pnpm install --frozen-lockfile
 pnpm dev
-
-# Build for production
 pnpm build
-
-# Preview production build
-pnpm preview
 ```
 
-### Available Scripts
+Open `http://localhost:5173/spoty2deezer/`. Start the backend separately with
+`npm ci && npm start` in `../back`; Vite forwards `/proxy` to port 3001.
+Production builds require `VITE_PROXY_TARGET` to point to the deployed backend.
 
-- `pnpm dev` - Start Vite development server
-- `pnpm build` - Build for production
-- `pnpm preview` - Preview production build
-- `pnpm lint` - Run Biome linter
-- `pnpm lint:fix` - Auto-fix linting issues
-- `pnpm format` - Format code with Biome
+## UI structure
 
-### Environment Variables
+`src/components/relay/` contains the complete interface:
 
-Create a `.env` file in the root of the frontend directory:
+- `RelayApp.tsx`: form, independent destination outcomes, cancellation, language
+  selection, help, clipboard feedback, and manual-copy recovery.
+- `Results.tsx`: source, destination cards, alternatives, and recording details.
+- `MediaCard.tsx`, `Dialog.tsx`, `Icon.tsx`: shared accessible presentation.
+- `presentation.ts`: input capability checks and normalized track/album data.
+- `copy.ts`: English and French copy; `relay.css`: tokens and responsive styling.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `VITE_PROXY_TARGET` | `http://localhost:3001` | Backend proxy URL for development |
+The existing conversion hooks and services supply real results. A failed
+destination preserves the other service's results. Retries stay bound to the
+displayed source; changing the field does not change what a retry searches.
+“Stop waiting” ignores late responses; it does not abort transport requests.
 
-Example `.env` file:
+## Verification
 
-```bash
-# Backend Proxy Configuration
-VITE_PROXY_TARGET=http://localhost:3001
+From this directory, using Node 24+ for its native TypeScript support:
+
+```sh
+node --experimental-strip-types --test tests/*.test.ts
+pnpm build
+pnpm --dir .. lint
 ```
 
-## Supported URL Formats
+The seven regression checks cover supported formats, search-link labeling,
+track/album metadata, safe destinations, and Deezer outage versus empty-result
+semantics. Lint passes with five existing warnings outside the new UI.
 
-- `https://open.spotify.com/track/{track-id}`
-- `spotify:track:{track-id}`
+## UI/UX audit · 2026-10-18
 
-## How It Works
+The implementation was audited in Chromium with scripted interaction checks,
+computed styles, screenshots, a live conversion, and independent code review.
 
-1. Paste a Spotify track URL
-2. The app fetches track information from Spotify's oEmbed API
-3. It searches Deezer's API for matching tracks
-4. Uses string similarity algorithms to find the best matches
-5. Displays results with album art and track details
+| Area | Findings addressed and evidence |
+| --- | --- |
+| Visual hierarchy and contrast | Preserved the approved neutral/Azure palette. Strengthened text, control boundaries, and focus indicators. Checked home-screen text has a minimum contrast of 5.1:1; secondary-control boundaries exceed 3:1. Fixed a cascade issue that hid secondary-button borders. |
+| Responsive layouts | No horizontal overflow at 320, 390, 640, 768, 1024, or 1440px in English and French. Repeated the interaction checks at 320px. |
+| Conversion and recovery | Distinct empty, failure, search-link, and partial-result states. Added manual search links, retained cached results with retries, and bound retries to the displayed source URL. Deezer failures and YouTube metadata failures now propagate instead of becoming misleading empty or invented results. |
+| Keyboard and announcements | Native modal focus containment/return, labeled inputs, errors, skip link, result-status announcements, and clipboard feedback. Removed redundant input focus outlines. Copy success is also shown inside an open detail dialog. |
+| Copying and details | Separate Open/Search and Copy controls. Confirmation follows clipboard success; failure reveals the exact selectable URL. Recording details preserve album metadata and include actions. Fixed a stray zero in empty feedback. |
+| Motion and icons | Consistent local SVG icons, hover/press feedback, result/dialog entrance transitions, and loading indication. A reduced-motion stylesheet removes movement. |
+| Content and navigation | Accurate link guide, localized missing-artist label, EN/FR selector, new-link action, updated favicon and browser theme. Unsupported playlist/Deezer-album promises were removed. |
 
-## Project Structure
+Twenty-five scripted browser checks passed using controlled service responses.
+A separate live Spotify conversion returned a real Deezer track and a labeled
+YouTube Music search link. External catalog availability still depends on those
+services. This audit does not constitute certification with assistive technology
+or a full cross-browser compatibility test.
 
-```
-spoty2deezer/
-├── src/
-│   ├── components/
-│   │   ├── common/               # Reusable UI components
-│   │   ├── link-converter/       # Main converter functionality
-│   │   └── ...
-│   ├── hooks/                    # Custom React hooks
-│   ├── services/                 # API services
-│   │   ├── spotifyService.ts     # Spotify API integration
-│   │   ├── deezerService.ts      # Deezer API integration
-│   │   └── youtubeMusicService.ts # YouTube Music API integration
-│   ├── types/                    # TypeScript type definitions
-│   ├── utils/                    # Utility functions
-│   └── ...
-├── index.html                    # HTML entry point
-├── vite.config.ts               # Vite configuration
-├── tailwind.config.js           # Tailwind CSS configuration
-├── tsconfig.json                # TypeScript configuration
-└── package.json                 # Project dependencies
-```
-
-## API Usage
-
-### Spotify
-- Uses Spotify's oEmbed API (no authentication required)
-- Fetches basic track information
-
-### Deezer
-- Uses Deezer's public search API via JSONP
-- No authentication required
-
-### YouTube Music
-- Integrates with YouTube Music for additional matching options
-
-## Development
-
-### Adding New Features
-
-The codebase uses standard React patterns:
-
-```tsx
-import React, { useState } from 'react';
-
-function ExampleComponent() {
-  const [state, setState] = useState('');
-
-  return (
-    <div className="p-4 bg-white rounded-lg shadow-lg">
-      <h1 className="text-xl font-bold text-gray-900">
-        Hello World
-      </h1>
-    </div>
-  );
-}
-```
-
-### Styling
-
-Uses Tailwind CSS for styling:
-
-```tsx
-<div className="flex-1 bg-white p-4 rounded-lg shadow-lg">
-  <h1 className="text-xl font-bold text-gray-900">
-    Hello World
-  </h1>
-</div>
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run `pnpm lint:fix` and `pnpm format`
-5. Submit a pull request
-
-## License
-
-MIT
-
-## Acknowledgments
-
-- Made with ❤️ for music lovers
-- Inspired by the need to convert playlists between streaming services
+Design explorations under the repository's `artifacts/` directory remain local
+and are excluded from Git and linting.
