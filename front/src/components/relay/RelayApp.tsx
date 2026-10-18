@@ -1,30 +1,17 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { useDeezerToSpotify } from '../../hooks/useDeezerToSpotify';
-import { useDeezerToYouTubeMusic } from '../../hooks/useDeezerToYouTubeMusic';
-import { useSpotifyToDeezer } from '../../hooks/useSpotifyToDeezer';
-import { useSpotifyToYouTubeMusic } from '../../hooks/useSpotifyToYouTubeMusic';
-import { useYouTubeMusicToDeezer } from '../../hooks/useYouTubeMusicToDeezer';
-import { useYouTubeMusicToSpotify } from '../../hooks/useYouTubeMusicToSpotify';
-import type { PlatformType } from '../../types/converter.types';
+import { useResolver } from '../../hooks/useResolver';
 import { useCopy } from './copy';
 import { Dialog } from './Dialog';
 import { Icon } from './Icon';
 import { Platform } from './MediaCard';
 import {
-	type Media,
 	platformNames,
 	platforms,
-	presentMedia,
 	type Results as ResultData,
 	supportedPlatform,
 } from './presentation';
 import { Results } from './Results';
 import './relay.css';
-
-interface SearchTask {
-	platform: PlatformType;
-	run: () => Promise<{ source?: Media; matches: Media[] }>;
-}
 
 export function RelayApp() {
 	const { copy, i18n } = useCopy();
@@ -46,12 +33,7 @@ export function RelayApp() {
 	const resultsRef = useRef<HTMLDivElement>(null);
 	const generation = useRef(0);
 	const previousUrl = useRef('');
-	const { convert: spotifyDeezer } = useSpotifyToDeezer();
-	const { convert: spotifyYouTube } = useSpotifyToYouTubeMusic();
-	const { convert: deezerSpotify } = useDeezerToSpotify();
-	const { convert: deezerYouTube } = useDeezerToYouTubeMusic();
-	const { convert: youtubeSpotify } = useYouTubeMusicToSpotify();
-	const { convert: youtubeDeezer } = useYouTubeMusicToDeezer();
+	const { resolve, cancel } = useResolver();
 	const detected = supportedPlatform(url);
 	const language = i18n.resolvedLanguage?.startsWith('fr') ? 'fr' : 'en';
 
@@ -82,128 +64,21 @@ export function RelayApp() {
 		const input = candidate.trim();
 		setUrl(input);
 		const previous = previousUrl.current === input ? result : null;
-		setResult(previous);
 		setError('');
 		setLoading(true);
-		let tasks: SearchTask[];
-		if (platform === 'spotify') {
-			tasks = [
-				{
-					platform: 'deezer',
-					run: async () => {
-						const data = await spotifyDeezer(input);
-						const media = data.spotifyAlbum ?? data.spotifyTrack;
-						return {
-							source:
-								media &&
-								presentMedia(media, data.spotifyAlbum ? 'album' : 'track'),
-							matches: [
-								...(data.deezerAlbumMatches ?? []).map((m) =>
-									presentMedia(m, 'album'),
-								),
-								...data.deezerMatches.map((m) => presentMedia(m)),
-							],
-						};
-					},
-				},
-				{
-					platform: 'youtubeMusic',
-					run: async () => {
-						const data = await spotifyYouTube(input);
-						const media = data.spotifyAlbum ?? data.spotifyTrack;
-						return {
-							source:
-								media &&
-								presentMedia(media, data.spotifyAlbum ? 'album' : 'track'),
-							matches: data.youtubeMatches.map((m) =>
-								presentMedia(m, data.spotifyAlbum ? 'album' : 'track'),
-							),
-						};
-					},
-				},
-			];
-		} else if (platform === 'deezer') {
-			tasks = [
-				{
-					platform: 'spotify',
-					run: async () => {
-						const data = await deezerSpotify(input);
-						return {
-							source: data.deezerTrack && presentMedia(data.deezerTrack),
-							matches: data.spotifyMatches.map((m) => presentMedia(m)),
-						};
-					},
-				},
-				{
-					platform: 'youtubeMusic',
-					run: async () => {
-						const data = await deezerYouTube(input);
-						return {
-							source: presentMedia(data.deezerTrack),
-							matches: data.youtubeMatches.map((m) => presentMedia(m)),
-						};
-					},
-				},
-			];
-		} else {
-			tasks = [
-				{
-					platform: 'spotify',
-					run: async () => {
-						const data = await youtubeSpotify(input);
-						return {
-							source: data.youtubeMusicAlbum
-								? presentMedia(data.youtubeMusicAlbum, 'album')
-								: data.youtubeMusicTrack &&
-									presentMedia(data.youtubeMusicTrack),
-							matches: data.spotifyMatches.map((m) =>
-								presentMedia(m, data.youtubeMusicAlbum ? 'album' : 'track'),
-							),
-						};
-					},
-				},
-				{
-					platform: 'deezer',
-					run: async () => {
-						const data = await youtubeDeezer(input);
-						return {
-							source: data.youtubeMusicAlbum
-								? presentMedia(data.youtubeMusicAlbum, 'album')
-								: data.youtubeMusicTrack &&
-									presentMedia(data.youtubeMusicTrack),
-							matches: data.deezerMatches.map((m) =>
-								presentMedia(m, data.youtubeMusicAlbum ? 'album' : 'track'),
-							),
-						};
-					},
-				},
-			];
-		}
-		const outcomes = await Promise.allSettled(tasks.map((task) => task.run()));
-		if (requestId !== generation.current) return;
-		const source =
-			outcomes.flatMap((outcome) =>
-				outcome.status === 'fulfilled' && outcome.value.source
-					? [outcome.value.source]
-					: [],
-			)[0] ?? previous?.source;
-		if (source) {
+		try {
+			const next = await resolve(input);
+			if (requestId !== generation.current) return;
 			setResult({
-				source,
-				platform,
-				destinations: tasks.map((task, index) => {
-					const outcome = outcomes[index];
-					return {
-						platform: task.platform,
-						matches:
-							outcome?.status === 'fulfilled'
-								? outcome.value.matches
-								: (previous?.destinations.find(
-										(d) => d.platform === task.platform,
-									)?.matches ?? []),
-						failed: outcome?.status !== 'fulfilled',
-					};
-				}),
+				...next,
+				destinations: next.destinations.map((destination) => ({
+					...destination,
+					matches: destination.failed
+						? (previous?.destinations.find(
+								(d) => d.platform === destination.platform,
+							)?.matches ?? [])
+						: destination.matches,
+				})),
 			});
 			previousUrl.current = input;
 			window.requestAnimationFrame(() =>
@@ -215,11 +90,15 @@ export function RelayApp() {
 						: 'smooth',
 				}),
 			);
-		} else setError('failed');
+		} catch {
+			if (requestId !== generation.current) return;
+			setError('failed');
+		}
 		setLoading(false);
 	}
 
 	function reset() {
+		cancel();
 		generation.current += 1;
 		setResult(null);
 		setUrl('');
@@ -421,6 +300,7 @@ export function RelayApp() {
 							type="button"
 							onClick={() => {
 								generation.current += 1;
+								cancel();
 								setLoading(false);
 							}}
 						>
@@ -532,11 +412,15 @@ export function RelayApp() {
 								<>
 									deezer.com/en/track/…
 									<br />
+									deezer.com/album/…
+									<br />
 									link.deezer.com/s/…
 								</>
 							) : (
 								<>
 									music.youtube.com/watch?v=…
+									<br />
+									music.youtube.com/playlist?list=OLAK5uy_…
 									<br />
 									www.youtube.com/watch?v=…
 									<br />

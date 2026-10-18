@@ -1,247 +1,52 @@
-> [!NOTE]
-> 🚧 This project is a work in progress 🚧
+# MusConv
 
-# 🎵 MusConv - Universal Music Platform Converter
+Find a track or album on Spotify, Deezer, and YouTube Music. The interface distinguishes catalog suggestions from search links and keeps successful results when another provider fails.
 
-Convert music links between Spotify, Deezer, and YouTube Music effortlessly. A full-stack web application with a secure backend proxy and modern React frontend.
+## Development
 
-## ✨ Features
+Use Node 24 and pnpm 9. Install the root and frontend dependencies with pnpm, and backend dependencies with npm:
 
-- 🎵 **Multi-platform support** - Convert between Spotify, Deezer, and YouTube Music
-- 🔍 **Smart matching** - Uses advanced string similarity algorithms for accurate track matching
-- 🌐 **Web-based** - No installation required, works in any modern browser
-- ⚡ **Fast & responsive** - Built with Vite and optimized for performance
-- 🛡️ **Secure proxy** - Backend validates all external API requests
-- 📋 **One-click copying** - Copy converted links to clipboard instantly
-- 🎨 **Modern UI** - Clean, responsive design with Tailwind CSS
-- 🔗 **Direct streaming** - Open tracks directly in your preferred music platform
-
-## 🏗️ Architecture
-
-### Backend (`/back`)
-- **Express.js** server with CORS proxy functionality
-- **Domain validation** - Only allows requests to music service APIs
-- **Request forwarding** - Secure proxy to Spotify, Deezer, and YouTube Music APIs
-- **Health monitoring** - Built-in health check endpoint
-
-### Frontend (`/front`)
-- **React 19** with TypeScript for type safety
-- **Vite** for fast development and optimized builds
-- **Tailwind CSS** for responsive, modern styling
-- **Biome** for linting and formatting
-
-## 🚀 Quick Start
-
-### Prerequisites
-- **Node.js** 18+ and **pnpm**
-- Modern web browser
-
-### Installation & Development
-
-```bash
-# Clone the repository
-git clone <your-repo-url>
-cd spoty2deezer
-
-# Install all dependencies
-pnpm run install:all
-
-# Start development servers (frontend + backend)
-pnpm run dev
-
-# Or run individually:
-pnpm run dev:front  # Frontend on http://localhost:5173
-pnpm run dev:back   # Backend on http://localhost:3001
+```sh
+pnpm install --frozen-lockfile
+pnpm --dir front install --frozen-lockfile
+npm --prefix back ci
+pnpm dev
 ```
 
-Visit `http://localhost:5173/spoty2deezer/` to use the application!
+Open `http://localhost:5173/spoty2deezer/`. Vite forwards `/api` to the Express backend on port 3001.
 
-## 📋 Usage
-
-1. **Paste a music URL** - Enter any Spotify, Deezer, or YouTube Music track URL
-2. **Get matches** - The app finds the best equivalents across all supported platforms
-3. **Choose your platform** - Click to copy links or open directly
-4. **Enjoy your music** - Stream on your preferred platform
-
-### Supported URL Formats
-
-- `https://open.spotify.com/track/{track-id}`
-- `spotify:track:{track-id}`
-- `https://music.youtube.com/watch?v={video-id}`
-- `https://www.youtube.com/watch?v={video-id}`
-- `https://deezer.com/track/{track-id}`
-- `https://www.deezer.com/track/{track-id}`
-
-## ⚙️ Environment Configuration
-
-### Backend Environment Variables
-
-Create a `.env` file in the `/back` directory:
-
-```bash
-# Server Configuration
-PORT=3001
-
-# Security Configuration
-ALLOWED_DOMAINS=open.spotify.com,api.spotify.com,oembed.spotify.com,api.deezer.com,link.deezer.com,www.deezer.com,www.youtube.com,music.youtube.com,youtube.com
-
-# Request Configuration
-REQUEST_TIMEOUT=15000
-MAX_REDIRECTS=5
-USER_AGENT=MusicConverter-Backend/1.0
+```sh
+pnpm test
+pnpm lint
+pnpm build
 ```
 
-### Frontend Environment Variables
+Tests include loopback HTTP integration tests. Builds go to `front/dist/`.
 
-Create a `.env` file in the `/front` directory:
+## Conversion architecture
 
-```bash
-# Development Server Configuration
-VITE_DEV_PORT=5173
+The browser sends one `POST /api/resolve` request. The backend canonicalizes the URL, fetches source metadata once, and queries the other two provider adapters concurrently. Matching prefers ISRC for recordings and UPC for albums, then compares artist, title, duration, version labels, and available album track lists.
 
-# Backend Proxy Configuration
-VITE_PROXY_TARGET=https://spoty2deezer.onrender.com
+The parser in `back/lib/music-link.mjs` is shared with frontend validation. The response types live in `back/lib/contract.d.ts`; the frontend validates responses before rendering them. Provider fetching and HTML parsing run exclusively on the backend.
 
-# Application Configuration
-VITE_BASE_PATH=/spoty2deezer/
-```
+Equivalent concurrent requests share work. Cancelling one caller does not cancel another; the last cancellation aborts upstream work. Complete successful results are cached in memory by canonical source and market for five minutes. Partial results and failures are not cached. The cache holds at most 200 entries; at most 32 distinct resolutions run concurrently. There is no database or background queue.
 
-For local development, create a `.env.local` file to override with localhost URLs:
+## Provider capabilities
 
-```bash
-# Local Development Environment Variables
-VITE_DEV_PORT=5173
-VITE_PROXY_TARGET=http://localhost:3001
-VITE_BASE_PATH=/spoty2deezer/
-```
+| Provider | Source metadata | Destination matching |
+| --- | --- | --- |
+| Spotify | Catalog API when configured; structured embed/oEmbed fallback | Catalog search with app credentials; otherwise a labelled search link |
+| Deezer | Public catalog API, including track/album and ISRC/UPC data | Identifier lookup followed by catalog search |
+| YouTube Music | YouTube API/oEmbed for tracks; public album-page metadata for `OLAK5uy_` albums | YouTube video search with an API key; otherwise a labelled search link. Albums remain search links. |
 
-## 📡 API Documentation
+The configured API branches are fixture-tested. Local live checks use public metadata and Deezer because Spotify/YouTube credentials are not configured. Access and quotas depend on the provider application. HTML metadata remains a fallback that may change independently of this app. ISRC equality is evidence of recording identity, not a guarantee of identical mastering or playback availability.
 
-### Backend Endpoints
+Track links and albums from all three services are supported. Generic playlist transfers are not implemented. Previews are independent of matching; unavailable YouTube embeds show a compact fallback link.
 
-#### Health Check
-```http
-GET /health
-```
-Returns server status and timestamp.
+## Configuration and deployment
 
-#### Proxy Endpoint
-```http
-GET /proxy?url=<encoded-url>
-```
-Proxies requests to music service APIs with domain validation.
+See [backend configuration](back/README.md) and [frontend documentation](front/README.md). Copy `back/.env.example` to `back/.env` if configuring credentials. Secrets belong only in the backend environment.
 
-**Example:**
-```bash
-curl "http://localhost:3001/proxy?url=https://open.spotify.com/oembed?url=https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh"
-```
+Production frontend builds accept `VITE_API_URL`; the existing `VITE_PROXY_TARGET` variable remains a compatibility alias. `render.yaml` deploys the backend from `back/` using Node 24 and `npm ci`.
 
-### Frontend API Integration
-
-The frontend automatically proxies API requests through the backend. No additional configuration needed for development.
-
-## 🚢 Deployment
-
-### Production Build
-
-```bash
-# Build the frontend
-pnpm run build
-
-# The built files will be in front/dist/
-```
-
-### Render Deployment
-
-The project includes `render.yaml` for easy deployment on Render:
-
-1. Connect your GitHub repository to Render
-2. Deploy the backend service (configured in `render.yaml`)
-3. Serve the built frontend files statically or through a CDN
-
-### Environment Variables for Production
-
-Set these environment variables in your deployment platform:
-
-**Backend:**
-- `PORT` - Server port (provided by Render)
-- `ALLOWED_DOMAINS` - Comma-separated list of allowed domains
-- `NODE_ENV` - Set to `production`
-
-## 🛠️ Development
-
-### Available Scripts
-
-```bash
-# Development
-pnpm run dev              # Start both frontend and backend
-pnpm run dev:front        # Frontend only
-pnpm run dev:back         # Backend only
-
-# Building
-pnpm run build            # Build frontend for production
-
-# Maintenance
-pnpm run install:all      # Install all dependencies
-pnpm run clean            # Clean all node_modules and build files
-pnpm run lint             # Check code with Biome
-pnpm run lint:fix         # Auto-fix linting issues
-pnpm run format           # Format code
-```
-
-### Project Structure
-
-```
-spoty2deezer/
-├── back/                 # Express.js backend
-│   ├── server.js        # Main server file
-│   ├── package.json     # Backend dependencies
-│   └── README.md        # Backend documentation
-├── front/               # React frontend
-│   ├── src/
-│   │   ├── components/  # React components
-│   │   ├── hooks/       # Custom React hooks
-│   │   ├── services/    # API service functions
-│   │   └── utils/       # Utility functions
-│   ├── package.json     # Frontend dependencies
-│   └── README.md        # Frontend documentation
-├── render.yaml          # Render deployment config
-├── biome.json          # Code formatting config
-└── package.json        # Root package management
-```
-
-## 🔒 Security
-
-- **Domain Validation** - Backend only allows requests to whitelisted music service domains
-- **Request Validation** - All URLs are validated before proxying
-- **CORS Protection** - Configurable CORS policies
-- **No Data Storage** - No user data or music content is stored
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make your changes and run tests: `pnpm run lint:fix`
-4. Commit your changes: `git commit -m 'Add some feature'`
-5. Push to the branch: `git push origin feature/your-feature`
-6. Open a Pull Request
-
-### Code Style
-
-- **Formatting**: Biome (configured in `biome.json`)
-- **TypeScript**: Strict type checking enabled
-- **Imports**: ES6 modules with absolute paths where possible
-
-## 📄 License
-
-MIT License - see individual package.json files for details.
-
-## 🙏 Acknowledgments
-
-- Built with ❤️ for music lovers who want platform freedom
-- Inspired by the frustration of maintaining multiple music libraries
-- Thanks to Spotify, Deezer, and YouTube Music for their APIs
-
----
-
-**Made with ❤️ for music lovers everywhere**
+The resolver replaces the old `/proxy` endpoint. Deploy the backend and frontend together, or enable the temporary legacy endpoint during a staged rollout as described in the backend README. Local design previews under `artifacts/` remain excluded from Git.

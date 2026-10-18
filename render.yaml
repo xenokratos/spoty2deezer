@@ -4,12 +4,12 @@ services:
   env: node
   rootDir: back
   buildCommand: |
-    npm install
+    npm ci
   startCommand: npm run start
   plan: free
   healthCheckPath: /health
   envVars:
   - key: NODE_VERSION
-    value: 20
-  - key: ALLOWLIST
-    value: link.deezer.com,www.deezer.com,api.deezer.com,open.spotify.com,spotify.link
+    value: 24
+  - key: DEFAULT_MARKET
+    value: FR

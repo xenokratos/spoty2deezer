@@ -1,13 +1,10 @@
 # MusConv · Relay
 
-A responsive music-link converter with calm off-white backgrounds, white surfaces,
-Azure actions, line icons, and motion that respects reduced-motion preferences.
-Tracks can come from Spotify, Deezer, or YouTube Music; Spotify and YouTube Music albums are also
-supported. Results distinguish direct suggestions from service search links.
+A responsive interface with neutral backgrounds, Azure actions, official platform marks, English/French copy, and reduced-motion support. Tracks and albums from Spotify, Deezer, and YouTube Music are supported; generic playlist transfers are not.
 
-## Run locally
+## Development
 
-Use pnpm 9 and Node 20.19+ for Vite. From this directory:
+Use Node 24 and pnpm 9:
 
 ```sh
 pnpm install --frozen-lockfile
@@ -15,39 +12,34 @@ pnpm dev
 pnpm build
 ```
 
-Open `http://localhost:5173/spoty2deezer/`. Start the backend separately with
-`npm ci && npm start` in `../back`; Vite forwards `/proxy` to port 3001.
-Production builds require `VITE_PROXY_TARGET` to point to the deployed backend.
+Open `http://localhost:5173/spoty2deezer/`. Start the backend with `npm ci && npm start` in `../back`. Vite forwards `/api` to port 3001. Production uses `VITE_API_URL` or the existing `VITE_PROXY_TARGET` alias.
 
-## UI structure
+## UI and data flow
 
-`src/components/relay/` contains the complete interface:
+- `RelayApp.tsx`: input, loading/cancellation, result retention, language, and clipboard recovery.
+- `useResolver.ts`: one abortable request to `/api/resolve` for every direction.
+- `resolutionContract.ts`: validates the backend response before it enters UI state.
+- `Results.tsx`: explicit outcomes, alternatives, partial results, retries, and details.
+- `EmbedPreview.tsx`: source players and a compact unavailable-player fallback.
+- `MediaCard.tsx`, `Dialog.tsx`, and `Icon.tsx`: shared presentation.
+- `presentation.ts`: shared input parser, embed URLs, and manual searches.
+- `copy.ts` and `relay.css`: copy, tokens, and responsive styling.
 
-- `RelayApp.tsx`: form, independent destination outcomes, cancellation, language
-  selection, help, clipboard feedback, and manual-copy recovery.
-- `Results.tsx`: source, destination cards, alternatives, and recording details.
-- `MediaCard.tsx`, `Dialog.tsx`, `Icon.tsx`: shared accessible presentation.
-- `presentation.ts`: input capability checks and normalized track/album data.
-- `copy.ts`: English and French copy; `relay.css`: tokens and responsive styling.
-
-The existing conversion hooks and services supply real results. A failed
-destination preserves the other service's results. Retries stay bound to the
-displayed source; changing the field does not change what a retry searches.
-“Stop waiting” ignores late responses; it does not abort transport requests.
+Provider fetching, metadata parsing, and matching live on the backend. Cancelling or resetting aborts the browser request; the backend aborts work when no callers remain. Successful results stay visible during retries; retries use the displayed source URL even if the input has changed. Preview availability is independent of conversion results.
 
 ## Verification
 
-From this directory, using Node 24+ for its native TypeScript support:
+From the repository root:
 
 ```sh
-node --experimental-strip-types --test tests/*.test.ts
+pnpm test
+pnpm lint
 pnpm build
-pnpm --dir .. lint
 ```
 
-The seven regression checks cover supported formats, search-link labeling,
-track/album metadata, safe destinations, and Deezer outage versus empty-result
-semantics. Lint passes with five existing warnings outside the new UI.
+The frontend checks parser/preview behavior and response validation. Backend tests cover conversion behavior through provider fixtures and loopback HTTP integration. Live provider checks and browser acceptance complement those deterministic tests. Credential-backed Spotify/YouTube branches are fixture-tested until credentials are configured.
+
+The following UI audit records the original Relay redesign. The resolver migration preserves its presentation while replacing its former browser-side conversion hooks.
 
 ## UI/UX audit · 2026-10-18
 
@@ -72,3 +64,9 @@ or a full cross-browser compatibility test.
 
 Design explorations under the repository's `artifacts/` directory remain local
 and are excluded from Git and linting.
+
+## Resolver migration verification · 2026-10-18
+
+The migrated build passed 50 automated checks (47 backend, three frontend), production compilation, and lint with one pre-existing `main.tsx` warning. Ten browser acceptance checks passed at desktop width and 320px, including modal copy feedback, explicit statuses, result retention, retry binding after editing the field, actual fetch cancellation, late-response protection, empty-result recovery, partial-candidate retries, and reset. The narrow frame had no horizontal overflow.
+
+Live public-provider checks passed for Spotify track/album, Deezer track/album, and YouTube Music track/album sources. They retained the expected artist and returned direct Deezer suggestions or clearly labelled destination searches. These checks used the local credential-free configuration; credential-backed branches use deterministic fixtures. Independent reviews identified redirect credential handling, rate-limit races, token cancellation, version distinctions, paginated albums, and duplicate track-title assignment; regression tests cover the fixes.

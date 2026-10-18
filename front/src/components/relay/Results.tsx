@@ -47,13 +47,29 @@ function DestinationCard({
 							? copy.noResults
 							: first?.search
 								? copy.searchLink
-								: first?.quality
-									? copy.top
-									: copy.checkVersion}
+								: destination.status === 'identifier_match'
+									? copy.identifierMatch
+									: first?.quality
+										? copy.top
+										: copy.checkVersion}
 				</span>
 			</div>
 			{first ? (
 				<>
+					{destination.partial && (
+						<div className="retained-result">
+							<p className="muted">{copy.partialResults}</p>
+							<button
+								type="button"
+								className="text-button"
+								disabled={busy}
+								onClick={onRetry}
+							>
+								<Icon name="retry" />
+								{copy.retry}
+							</button>
+						</div>
+					)}
 					{destination.failed && (
 						<div className="retained-result">
 							<p className="muted">{copy.previousResult}</p>
@@ -146,7 +162,7 @@ function DestinationCard({
 							{busy ? copy.searching : copy.retry}
 						</button>
 					)}
-					{!destination.failed && (
+					{
 						<a
 							className="button secondary"
 							href={manualSearch(destination.platform, source)}
@@ -156,7 +172,7 @@ function DestinationCard({
 							<Icon name="search" />
 							{copy.searchOn}
 						</a>
-					)}
+					}
 				</div>
 			)}
 		</article>

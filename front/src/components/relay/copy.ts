@@ -15,14 +15,14 @@ const en = {
 	example: 'Use “La bohème” as an example',
 	clear: 'Clear link',
 	stepOne: 'Paste a link',
-	stepOneCopy: 'Use a track link or a Spotify or YouTube Music album link.',
+	stepOneCopy: 'Use a track or album link.',
 	stepTwo: 'Check the results',
 	stepTwoCopy: 'Check the song and its version.',
 	stepThree: 'Open or copy the link',
 	stepThreeCopy: 'Choose a result on the service you want to use.',
 	emptyInput: 'Add a music link to get started.',
 	invalid:
-		'Use a supported track link, or a Spotify or YouTube Music album link. Open the link guide for examples.',
+		'Use a supported track or album link. Open the link guide for examples.',
 	detected: 'Link detected',
 	source: 'Source',
 	track: 'Track',
@@ -39,6 +39,9 @@ const en = {
 	resultTitle: 'Search results',
 	newLink: 'New link',
 	top: 'Top suggestion',
+	identifierMatch: 'Identifier match',
+	partialResults:
+		'Some results could not be checked. You can retry the search.',
 	checkVersion: 'Check version',
 	searchLink: 'Search link',
 	searchCopy: 'Open the search results and select the correct recording.',
@@ -72,9 +75,9 @@ const en = {
 	helpCopy:
 		'Copy a link from its music service. We identify the source automatically.',
 	spotifyHelp: 'Track and album links, including Spotify URIs.',
-	deezerHelp: 'Track links, locale paths, and shortened links.',
+	deezerHelp: 'Track and album links, including shortened links.',
 	youtubeHelp: 'Track links from YouTube and album links from YouTube Music.',
-	unsupported: 'Deezer albums and playlist transfers aren’t supported yet.',
+	unsupported: 'Playlist transfers aren’t supported.',
 	detailsTitle: 'Result details',
 	suggestion: 'Suggestion',
 	verify:
@@ -100,15 +103,14 @@ const fr: typeof en = {
 	example: 'Utiliser « La bohème » comme exemple',
 	clear: 'Effacer le lien',
 	stepOne: 'Coller un lien',
-	stepOneCopy:
-		'Utilisez un lien vers un titre ou un album Spotify ou YouTube Music.',
+	stepOneCopy: 'Utilisez un lien vers un titre ou un album.',
 	stepTwo: 'Vérifier les résultats',
 	stepTwoCopy: 'Vérifiez le titre et sa version.',
 	stepThree: 'Ouvrir ou copier le lien',
 	stepThreeCopy: 'Choisissez un résultat sur le service souhaité.',
 	emptyInput: 'Ajoutez un lien musical pour commencer.',
 	invalid:
-		'Utilisez un lien vers un titre ou un album Spotify ou YouTube Music. Consultez le guide pour voir des exemples.',
+		'Utilisez un lien vers un titre ou un album. Consultez le guide pour voir des exemples.',
 	detected: 'Lien reconnu',
 	source: 'Source',
 	track: 'Titre',
@@ -125,6 +127,9 @@ const fr: typeof en = {
 	resultTitle: 'Résultats de recherche',
 	newLink: 'Nouveau lien',
 	top: 'Première suggestion',
+	identifierMatch: 'Identifiant correspondant',
+	partialResults:
+		'Certains résultats n’ont pas pu être vérifiés. Vous pouvez relancer la recherche.',
 	checkVersion: 'Vérifiez la version',
 	searchLink: 'Lien de recherche',
 	searchCopy:
@@ -158,10 +163,9 @@ const fr: typeof en = {
 	helpCopy:
 		'Copiez un lien depuis son service musical. Nous reconnaissons la source automatiquement.',
 	spotifyHelp: 'Liens vers un titre ou un album, et URI Spotify.',
-	deezerHelp: 'Liens vers un titre, avec langue ou raccourcis.',
+	deezerHelp: 'Liens vers un titre ou un album, et liens raccourcis.',
 	youtubeHelp: 'Liens vers un titre YouTube ou un album YouTube Music.',
-	unsupported:
-		'Les albums Deezer et les transferts de playlists ne sont pas encore pris en charge.',
+	unsupported: 'Le transfert de playlists n’est pas pris en charge.',
 	detailsTitle: 'Détails du résultat',
 	suggestion: 'Suggestion',
 	verify:

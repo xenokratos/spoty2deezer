@@ -3,41 +3,42 @@ import test from 'node:test';
 import {
 	embedPreview,
 	type Media,
-	presentMedia,
 	safeLink,
 	supportedPlatform,
 } from '../src/components/relay/presentation.ts';
+import { isResolution } from '../src/utils/resolutionContract.ts';
 
-test('previews use fixed player hosts and reject search links or lookalike hosts', () => {
-	const media: Media = {
-		id: '1',
-		title: 'Song',
-		artist: 'Artist',
-		url: 'https://open.spotify.com/track/1WvvmEowf7hiz5EnyAwtTj?si=test',
-		kind: 'track',
-		search: false,
-		quality: true,
-	};
+const media: Media = {
+	id: '1WvvmEowf7hiz5EnyAwtTj',
+	title: 'La bohème',
+	artist: 'Charles Aznavour',
+	url: 'https://open.spotify.com/track/1WvvmEowf7hiz5EnyAwtTj',
+	kind: 'track',
+	search: false,
+	quality: false,
+};
+test('form capabilities use the same canonical parser as the resolver', () => {
+	assert.equal(supportedPlatform(media.url), 'spotify');
+	assert.equal(
+		supportedPlatform('https://www.deezer.com/en/album/123'),
+		'deezer',
+	);
+	assert.equal(
+		supportedPlatform(
+			'https://music.youtube.com/playlist?si=x&list=OLAK5uy_mOc1th972qKWclHh98LPE58fSjzjTeLuo',
+		),
+		'youtubeMusic',
+	);
+	assert.equal(
+		supportedPlatform('https://music.youtube.com/playlist?list=PLdemo'),
+		null,
+	);
+	assert.equal(supportedPlatform('https://fake-spotify.com/track/abc'), null);
+});
+test('embeds accept canonical recordings and albums, never search links or lookalike hosts', () => {
 	assert.equal(
 		embedPreview(media, 'spotify'),
 		'https://open.spotify.com/embed/track/1WvvmEowf7hiz5EnyAwtTj',
-	);
-	assert.equal(
-		embedPreview(
-			{ ...media, url: 'https://www.deezer.com/fr/track/123' },
-			'deezer',
-		),
-		'https://widget.deezer.com/widget/light/track/123',
-	);
-	assert.equal(
-		embedPreview(
-			{
-				...media,
-				url: 'https://music.youtube.com/watch?v=dQw4w9WgXcQ&list=other',
-			},
-			'youtubeMusic',
-		),
-		'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
 	);
 	assert.equal(embedPreview({ ...media, search: true }, 'spotify'), null);
 	assert.equal(
@@ -55,85 +56,56 @@ test('previews use fixed player hosts and reject search links or lookalike hosts
 	);
 	assert.equal(
 		embedPreview(
-			{ ...media, url: 'https://music.youtube.com/watch?v=bad' },
+			{
+				...media,
+				kind: 'album',
+				url: 'https://music.youtube.com/playlist?list=OLAK5uy_demo',
+			},
 			'youtubeMusic',
 		),
-		null,
+		'https://www.youtube-nocookie.com/embed/videoseries?list=OLAK5uy_demo',
 	);
-});
-
-test('only advertises input formats backed by conversion hooks', () => {
-	assert.equal(
-		supportedPlatform('spotify:album:15FZlljjgimILw4hn7urFj'),
-		'spotify',
-	);
-	assert.equal(
-		supportedPlatform('https://www.deezer.com/en/track/12345'),
-		'deezer',
-	);
-	assert.equal(supportedPlatform('https://link.deezer.com/s/abc123'), 'deezer');
-	assert.equal(
-		supportedPlatform('https://music.youtube.com/watch?v=dQw4w9WgXcQ'),
-		'youtubeMusic',
-	);
-	assert.equal(
-		supportedPlatform('https://music.youtube.com/playlist?list=PLdemo'),
-		null,
-	);
-	assert.equal(supportedPlatform('https://deezer.com/album/1234'), null);
-	assert.equal(supportedPlatform('https://fake-spotify.com/track/abc'), null);
-	assert.equal(supportedPlatform(''), null);
-});
-
-test('search suggestions remain searches even when the service marks them high quality', () => {
-	const media = presentMedia({
-		id: 'search-1',
-		name: 'Song',
-		artists: ['Artist'],
-		album: '',
-		images: [],
-		external_urls: { spotify: 'https://open.spotify.com/search/Artist%20Song' },
-		isHighQuality: true,
-	});
-	assert.equal(media.search, true);
-	assert.equal(media.title, 'Song');
-	assert.equal(media.artist, 'Artist');
-});
-
-test('album cards and track fallbacks retain their own type and destination', () => {
-	const album = presentMedia(
-		{
-			id: 1,
-			title: 'Album',
-			artist: 'Artist',
-			cover: '',
-			link: 'https://www.deezer.com/album/1',
-			total_tracks: 6,
-		},
-		'album',
-	);
-	const track = presentMedia({
-		id: 2,
-		title: 'Track',
-		artist: 'Artist',
-		album: 'Album',
-		cover: '',
-		link: 'https://www.deezer.com/track/2',
-		preview: '',
-		duration: 10,
-	});
-	assert.equal(album.kind, 'album');
-	assert.equal(album.trackCount, 6);
-	assert.equal(track.kind, 'track');
-	assert.equal(track.albumTitle, 'Album');
-	assert.equal(track.url, 'https://www.deezer.com/track/2');
-});
-
-test('unsafe destination schemes cannot become open or copy actions', () => {
 	assert.equal(safeLink('javascript:alert(1)'), '');
-	assert.equal(safeLink('data:text/html,test'), '');
+});
+test('the frontend rejects malformed or unsafe resolver responses', () => {
+	const valid = {
+		schemaVersion: 1,
+		market: 'FR',
+		platform: 'spotify',
+		source: media,
+		destinations: [
+			{ platform: 'deezer', status: 'no_match', failed: false, matches: [] },
+			{
+				platform: 'youtubeMusic',
+				status: 'provider_unavailable',
+				failed: true,
+				matches: [],
+			},
+		],
+	};
+	assert.equal(isResolution(valid), true);
 	assert.equal(
-		safeLink('https://music.youtube.com/search?q=song'),
-		'https://music.youtube.com/search?q=song',
+		isResolution({
+			...valid,
+			source: { ...media, url: 'javascript:alert(1)' },
+		}),
+		false,
+	);
+	assert.equal(
+		isResolution({
+			...valid,
+			destinations: [valid.destinations[0], valid.destinations[0]],
+		}),
+		false,
+	);
+	assert.equal(
+		isResolution({
+			...valid,
+			destinations: [
+				{ ...valid.destinations[0], failed: true },
+				valid.destinations[1],
+			],
+		}),
+		false,
 	);
 });

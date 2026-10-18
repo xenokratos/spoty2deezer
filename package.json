@@ -12,7 +12,10 @@
 		"clean:dist": "rm -rf front/dist back/dist",
 		"lint": "biome check --config-path biome.json .",
 		"lint:fix": "biome check --config-path biome.json --write .",
-		"format": "biome format --config-path biome.json --write ."
+		"format": "biome format --config-path biome.json --write .",
+		"test": "pnpm run test:back && pnpm run test:front",
+		"test:back": "node --test back/tests/*.test.mjs",
+		"test:front": "node --experimental-strip-types --test front/tests/*.test.ts"
 	},
 	"devDependencies": {
 		"concurrently": "^8.2.0",
