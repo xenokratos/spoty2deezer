@@ -4,12 +4,15 @@
 
 import type { DeezerAlbum, DeezerTrack } from './deezer.types';
 import type { SpotifyAlbum, SpotifyTrack } from './spotify.types';
-import type { YouTubeMusicTrack } from './youtubeMusic.types';
+import type {
+	YouTubeMusicAlbum,
+	YouTubeMusicTrack,
+} from './youtubeMusic.types';
 
 export type PlatformType = 'spotify' | 'deezer' | 'youtubeMusic';
 
 export type SourceTrack = SpotifyTrack | DeezerTrack | YouTubeMusicTrack;
-export type SourceAlbum = SpotifyAlbum | DeezerAlbum;
+export type SourceAlbum = SpotifyAlbum | DeezerAlbum | YouTubeMusicAlbum;
 
 export interface ConversionResult {
 	source: SourceTrack | SourceAlbum;

@@ -212,7 +212,7 @@
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: 64px;
-	align-items: center;
+	align-items: start;
 }
 .relay-app h1 {
 	font-size: clamp(40px, 5vw, 58px);
@@ -473,7 +473,7 @@
 .source-card {
 	display: flex;
 	gap: 20px;
-	align-items: center;
+	align-items: flex-start;
 	padding-bottom: 28px;
 	margin-bottom: 28px;
 	border-bottom: 1px solid var(--line);
@@ -520,6 +520,32 @@
 	font-size: 12px;
 	color: var(--muted);
 	margin-top: 5px;
+}
+.embed-preview {
+	margin: 20px 0 28px;
+}
+.embed-preview iframe {
+	display: block;
+	border: 0;
+	border-radius: 12px;
+	max-width: 100%;
+	background: var(--soft);
+}
+.embed-preview > a {
+	margin-top: 8px;
+}
+.embed-preview-youtubeMusic iframe {
+	height: auto;
+	aspect-ratio: 16 / 9;
+	max-width: 640px;
+}
+.preview-unavailable {
+	display: block;
+	padding: 16px 20px;
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	background: var(--surface);
+	color: var(--muted);
 }
 .destinations {
 	display: grid;

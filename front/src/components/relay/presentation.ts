@@ -3,7 +3,11 @@ import type {
 	SourceAlbum,
 	SourceTrack,
 } from '../../types/converter.types';
-import { detectPlatform, parseYouTubeMusicUrl } from '../../utils/urlParser.ts';
+import {
+	detectPlatform,
+	parseYouTubeMusicAlbumUrl,
+	parseYouTubeMusicUrl,
+} from '../../utils/urlParser.ts';
 
 export interface Media {
 	id: string;
@@ -42,7 +46,9 @@ export function supportedPlatform(input: string): PlatformType | null {
 	const platform = detectPlatform(value);
 	if (
 		!platform ||
-		(platform === 'youtubeMusic' && !parseYouTubeMusicUrl(value))
+		(platform === 'youtubeMusic' &&
+			!parseYouTubeMusicUrl(value) &&
+			!parseYouTubeMusicAlbumUrl(value))
 	)
 		return null;
 	if (value.startsWith('spotify:')) return platform;
@@ -75,6 +81,57 @@ export function safeLink(value: string): string {
 	} catch {
 		return '';
 	}
+}
+
+export function embedPreview(
+	media: Media,
+	platform: PlatformType,
+): string | null {
+	if (media.search) return null;
+	try {
+		const url = new URL(media.url);
+		if (url.protocol !== 'https:') return null;
+		if (platform === 'spotify' && url.hostname === 'open.spotify.com') {
+			const match = url.pathname.match(
+				/^\/(track|album)\/([a-zA-Z0-9]{22})\/?$/,
+			);
+			return match
+				? `https://open.spotify.com/embed/${match[1]}/${match[2]}`
+				: null;
+		}
+		if (
+			platform === 'deezer' &&
+			['deezer.com', 'www.deezer.com'].includes(url.hostname)
+		) {
+			const match = url.pathname.match(
+				/^\/(?:[a-z]{2}\/)?(track|album)\/(\d+)\/?$/,
+			);
+			return match
+				? `https://widget.deezer.com/widget/light/${match[1]}/${match[2]}`
+				: null;
+		}
+		if (
+			platform === 'youtubeMusic' &&
+			[
+				'music.youtube.com',
+				'www.youtube.com',
+				'youtube.com',
+				'm.youtube.com',
+			].includes(url.hostname) &&
+			['/watch', '/playlist'].includes(url.pathname)
+		) {
+			const album = parseYouTubeMusicAlbumUrl(media.url);
+			if (album)
+				return `https://www.youtube-nocookie.com/embed/videoseries?list=${album}`;
+			const id = url.searchParams.get('v');
+			return id && /^[a-zA-Z0-9_-]{11}$/.test(id)
+				? `https://www.youtube-nocookie.com/embed/${id}`
+				: null;
+		}
+	} catch {
+		return null;
+	}
+	return null;
 }
 
 export function manualSearch(platform: PlatformType, source: Media): string {

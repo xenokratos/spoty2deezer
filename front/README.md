@@ -2,7 +2,7 @@
 
 A responsive music-link converter with calm off-white backgrounds, white surfaces,
 Azure actions, line icons, and motion that respects reduced-motion preferences.
-Tracks can come from Spotify, Deezer, or YouTube Music; Spotify albums are also
+Tracks can come from Spotify, Deezer, or YouTube Music; Spotify and YouTube Music albums are also
 supported. Results distinguish direct suggestions from service search links.
 
 ## Run locally

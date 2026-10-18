@@ -1,6 +1,10 @@
 import type { SpotifyAlbum } from '../types/spotify.types';
-import type { YouTubeMusicTrack } from '../types/youtubeMusic.types';
+import type {
+	YouTubeMusicAlbum,
+	YouTubeMusicTrack,
+} from '../types/youtubeMusic.types';
 import { fetchWithProxy } from '../utils/responseWrapper';
+import { parseYouTubeAlbum } from './youtubeAlbumMetadata';
 
 interface YouTubeOEmbedResponse {
 	title: string;
@@ -25,6 +29,21 @@ interface YouTubeOEmbedResponse {
  * from other platforms, since direct API access to YouTube Music is not available.
  */
 class YouTubeMusicService {
+	async getAlbum(albumId: string): Promise<YouTubeMusicAlbum> {
+		if (!/^OLAK5uy_[a-zA-Z0-9_-]+$/.test(albumId))
+			throw new Error('Invalid YouTube Music album ID');
+		const url = `https://music.youtube.com/playlist?list=${albumId}`;
+		const html = await fetchWithProxy<string>(url, { timeout: 15000 });
+		const metadata = parseYouTubeAlbum(html);
+		return {
+			...metadata,
+			id: albumId,
+			channel: metadata.artists.join(', '),
+			url,
+			thumbnail: metadata.images[0]?.url ?? '',
+			external_urls: { youtube: url },
+		};
+	}
 	/**
 	 * Normalize string for better search query
 	 * @param str - String to normalize

@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import type { PlatformType } from '../../types/converter.types';
 import { useCopy } from './copy';
 import { Dialog } from './Dialog';
+import { EmbedPreview } from './EmbedPreview';
 import { Icon } from './Icon';
 import { MediaActions, Platform, SourceCard } from './MediaCard';
 import {
@@ -196,6 +197,7 @@ export function Results({
 				</button>
 			</div>
 			<SourceCard media={result.source} platform={result.platform} />
+			<EmbedPreview media={result.source} platform={result.platform} />
 			<div className="destinations">
 				{result.destinations.map((destination) => (
 					<DestinationCard

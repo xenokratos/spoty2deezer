@@ -152,9 +152,13 @@ export function RelayApp() {
 					run: async () => {
 						const data = await youtubeSpotify(input);
 						return {
-							source:
-								data.youtubeMusicTrack && presentMedia(data.youtubeMusicTrack),
-							matches: data.spotifyMatches.map((m) => presentMedia(m)),
+							source: data.youtubeMusicAlbum
+								? presentMedia(data.youtubeMusicAlbum, 'album')
+								: data.youtubeMusicTrack &&
+									presentMedia(data.youtubeMusicTrack),
+							matches: data.spotifyMatches.map((m) =>
+								presentMedia(m, data.youtubeMusicAlbum ? 'album' : 'track'),
+							),
 						};
 					},
 				},
@@ -163,9 +167,13 @@ export function RelayApp() {
 					run: async () => {
 						const data = await youtubeDeezer(input);
 						return {
-							source:
-								data.youtubeMusicTrack && presentMedia(data.youtubeMusicTrack),
-							matches: data.deezerMatches.map((m) => presentMedia(m)),
+							source: data.youtubeMusicAlbum
+								? presentMedia(data.youtubeMusicAlbum, 'album')
+								: data.youtubeMusicTrack &&
+									presentMedia(data.youtubeMusicTrack),
+							matches: data.deezerMatches.map((m) =>
+								presentMedia(m, data.youtubeMusicAlbum ? 'album' : 'track'),
+							),
 						};
 					},
 				},
@@ -284,12 +292,7 @@ export function RelayApp() {
 			<main className="app-main" id={mainId}>
 				<div className={`hero ${result || loading ? 'hero-compact' : ''}`}>
 					<div className="hero-copy">
-						<p className="eyebrow">{copy.eyebrow}</p>
-						<h1>
-							{copy.headline}
-							<br />
-							<span>{copy.headlineEnd}</span>
-						</h1>
+						<h1>{copy.headline}</h1>
 						<p className="hero-description">{copy.intro}</p>
 						<div className="platforms">
 							{platforms.map((platform) => (

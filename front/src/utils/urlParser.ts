@@ -117,18 +117,24 @@ export function parseYouTubeMusicAlbumUrl(
 	url: string | null | undefined,
 ): string | null {
 	if (!url) return null;
-
-	const trimmedUrl = url.trim();
-
-	// Handle YouTube Music playlist/album URLs
-	const albumUrlMatch = trimmedUrl.match(
-		/(?:https?:\/\/)?(?:music\.)?youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/,
-	);
-	if (albumUrlMatch?.[1]) {
-		return albumUrlMatch[1];
+	try {
+		const parsed = new URL(url.trim());
+		if (
+			!['https:', 'http:'].includes(parsed.protocol) ||
+			![
+				'music.youtube.com',
+				'www.youtube.com',
+				'youtube.com',
+				'm.youtube.com',
+			].includes(parsed.hostname) ||
+			parsed.pathname !== '/playlist'
+		)
+			return null;
+		const id = parsed.searchParams.get('list');
+		return id && /^OLAK5uy_[a-zA-Z0-9_-]+$/.test(id) ? id : null;
+	} catch {
+		return null;
 	}
-
-	return null;
 }
 
 /**

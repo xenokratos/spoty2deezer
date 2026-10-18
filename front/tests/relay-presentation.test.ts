@@ -1,10 +1,66 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+	embedPreview,
+	type Media,
 	presentMedia,
 	safeLink,
 	supportedPlatform,
 } from '../src/components/relay/presentation.ts';
+
+test('previews use fixed player hosts and reject search links or lookalike hosts', () => {
+	const media: Media = {
+		id: '1',
+		title: 'Song',
+		artist: 'Artist',
+		url: 'https://open.spotify.com/track/1WvvmEowf7hiz5EnyAwtTj?si=test',
+		kind: 'track',
+		search: false,
+		quality: true,
+	};
+	assert.equal(
+		embedPreview(media, 'spotify'),
+		'https://open.spotify.com/embed/track/1WvvmEowf7hiz5EnyAwtTj',
+	);
+	assert.equal(
+		embedPreview(
+			{ ...media, url: 'https://www.deezer.com/fr/track/123' },
+			'deezer',
+		),
+		'https://widget.deezer.com/widget/light/track/123',
+	);
+	assert.equal(
+		embedPreview(
+			{
+				...media,
+				url: 'https://music.youtube.com/watch?v=dQw4w9WgXcQ&list=other',
+			},
+			'youtubeMusic',
+		),
+		'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
+	);
+	assert.equal(embedPreview({ ...media, search: true }, 'spotify'), null);
+	assert.equal(
+		embedPreview(
+			{
+				...media,
+				url: media.url.replace(
+					'open.spotify.com',
+					'open.spotify.com.example.com',
+				),
+			},
+			'spotify',
+		),
+		null,
+	);
+	assert.equal(
+		embedPreview(
+			{ ...media, url: 'https://music.youtube.com/watch?v=bad' },
+			'youtubeMusic',
+		),
+		null,
+	);
+});
 
 test('only advertises input formats backed by conversion hooks', () => {
 	assert.equal(
@@ -21,7 +77,7 @@ test('only advertises input formats backed by conversion hooks', () => {
 		'youtubeMusic',
 	);
 	assert.equal(
-		supportedPlatform('https://music.youtube.com/playlist?list=OLAK5uy_demo'),
+		supportedPlatform('https://music.youtube.com/playlist?list=PLdemo'),
 		null,
 	);
 	assert.equal(supportedPlatform('https://deezer.com/album/1234'), null);

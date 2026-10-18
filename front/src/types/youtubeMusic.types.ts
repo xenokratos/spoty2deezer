@@ -29,3 +29,7 @@ export interface YouTubeMusicTrack {
 	external_urls: { youtube: string };
 	isHighQuality?: boolean;
 }
+
+export interface YouTubeMusicAlbum extends YouTubeMusicTrack {
+	total_tracks?: number;
+}
